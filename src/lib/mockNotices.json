@@ -1,0 +1,42 @@
+[
+  {
+    "id": "notice-seed-1",
+    "collegeId": "mock-college-id",
+    "title": "Campus Annual Sports Meet 2083",
+    "content": "Registration for the annual sports meet is now open. Events include Football, Basketball, Table Tennis, and Athletics. Contact the Sports Coordinator to sign up.",
+    "targetAudience": "ALL",
+    "createdById": "mock-principal-id",
+    "createdBy": {
+      "name": "Dr. Ram Prasad Adhikari",
+      "role": "PRINCIPAL"
+    },
+    "createdAt": "2026-06-27T06:59:36.504Z"
+  },
+  {
+    "id": "notice-seed-2",
+    "collegeId": "mock-college-id",
+    "title": "Faculty Academic Review Meeting",
+    "content": "All teachers and department heads are requested to attend the third terminal academic review meeting in the Main Conference Hall this Friday at 3:00 PM.",
+    "targetAudience": "TEACHERS",
+    "createdById": "mock-vp-id",
+    "createdBy": {
+      "name": "Prof. Shyam K. Karki",
+      "role": "VICE_PRINCIPAL"
+    },
+    "createdAt": "2026-06-30T06:59:36.505Z"
+  },
+  {
+    "id": "notice-seed-3",
+    "collegeId": "mock-college-id",
+    "title": "Terminal Examination Guidelines & Regulations",
+    "content": "Please find attached the official exam regulations, sit arrangements, code of conduct, and timing schedule for the upcoming terminal evaluations.",
+    "targetAudience": "STUDENTS",
+    "attachmentUrl": "/uploads/exam-conduct-guidelines.pdf",
+    "createdById": "mock-principal-id",
+    "createdBy": {
+      "name": "Dr. Ram Prasad Adhikari",
+      "role": "PRINCIPAL"
+    },
+    "createdAt": "2026-07-01T18:59:36.505Z"
+  }
+]

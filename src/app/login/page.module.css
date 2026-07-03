@@ -1,0 +1,314 @@
+.splitWrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #ffffff;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+/* Left Pane: Visual Showcase */
+.visualPane {
+  flex: 1.22; /* Occupies 55% width */
+  background-image: url('/campus_background.png');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.visualOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(11, 31, 58, 0.88); /* Overlay #0B1F3A with opacity */
+  padding: 60px 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.overlayContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.leftBrandBadge {
+  border: 2px solid #ffffff;
+  border-radius: 50% 20% 50% 20%;
+  padding: 8px 24px;
+  font-style: italic;
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: #ffffff;
+  letter-spacing: -1.2px;
+  width: fit-content;
+  line-height: 1;
+}
+
+.visualTextContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.headline {
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
+  letter-spacing: -1px;
+}
+
+.subtitle {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0;
+}
+
+.bulletList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 36px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 24px;
+}
+
+.bulletItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.bulletCheck {
+  color: #10B981; /* Emerald Green checkmarks */
+}
+
+/* Right Pane: Login Form */
+.formPane {
+  flex: 1; /* Occupies 45% width */
+  padding: 60px 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #ffffff;
+}
+
+.formContentBox {
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.rightLogoBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+}
+
+.rightBrandBadge {
+  border: 2.5px solid #0B1F3A;
+  border-radius: 50% 20% 50% 20%;
+  padding: 6px 18px;
+  font-style: italic;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: #0B1F3A;
+  letter-spacing: -1px;
+  display: inline-block;
+  line-height: 1;
+}
+
+.rightWelcomeTitle {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.rightWelcomeSubtitle {
+  font-size: 0.9rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.selectInput {
+  width: 100%;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 0.9rem;
+  background: #ffffff;
+  color: #64748B;
+  outline: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.selectInput:focus {
+  border-color: #2563EB;
+}
+
+.selectInput option {
+  background-color: #ffffff;
+  color: #0F172A;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  background: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.inputWrapper:focus-within {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.inputIcon {
+  padding: 12px;
+  border-right: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94A3B8;
+  background: #F8FAFC;
+  min-width: 44px;
+}
+
+.textInput {
+  flex: 1;
+  border: none;
+  padding: 12px;
+  font-size: 0.9rem;
+  outline: none;
+  color: #0F172A;
+  background: #ffffff;
+}
+
+.passwordToggle {
+  padding: 12px;
+  color: #94A3B8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.rememberMeLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748B;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.forgotLink {
+  color: #2563EB;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgotLink:hover {
+  text-decoration: underline;
+}
+
+/* Royal Blue full-width Button styling */
+.royalBlueBtn {
+  background-color: #2563EB;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+}
+
+.royalBlueBtn:hover {
+  background-color: #1d4ed8;
+}
+
+.royalBlueBtn:active {
+  transform: scale(0.98);
+}
+
+.error {
+  color: #EF4444;
+  background: rgba(239, 68, 68, 0.03);
+  border: 1px solid rgba(239, 68, 68, 0.12);
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.poweredFooter {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #94A3B8;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Responsive breakpoint styling */
+@media (max-width: 950px) {
+  .splitWrapper {
+    flex-direction: column;
+  }
+  
+  .visualPane {
+    display: none;
+  }
+  
+  .formPane {
+    width: 100%;
+    padding: 80px 20px;
+    min-height: 100vh;
+  }
+}

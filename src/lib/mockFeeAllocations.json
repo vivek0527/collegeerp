@@ -1,0 +1,29 @@
+[
+  {
+    "id": "mock-alloc-seed",
+    "collegeId": "mock-college-id",
+    "studentId": "mock-student-profile-id",
+    "feeStructureId": "mock-fee-struct-seed",
+    "amountPaid": 5000,
+    "dueAmount": 3500,
+    "status": "PARTIAL",
+    "createdAt": "2026-07-02T07:07:02.232Z",
+    "feeStructure": {
+      "id": "mock-fee-struct-seed",
+      "title": "Tuition Fee - Shrawan 2083",
+      "amount": 8500,
+      "dueDateAD": "2026-07-31T18:30:00.000Z",
+      "dueDateBS": "2083-04-18"
+    },
+    "student": {
+      "rollNumber": "12",
+      "user": {
+        "name": "Niranjan Thapa"
+      },
+      "class": {
+        "name": "Grade 11",
+        "section": "Science-A"
+      }
+    }
+  }
+]

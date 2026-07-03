@@ -1,0 +1,40 @@
+[
+  {
+    "id": "sal-seed-1",
+    "collegeId": "mock-college-id",
+    "userId": "mock-teacher-id",
+    "userName": "Mr. Santosh Dahal",
+    "userRole": "TEACHER",
+    "basicSalary": 55000,
+    "allowances": 3500,
+    "deductions": 1000,
+    "netSalary": 57500,
+    "payPeriod": "Asar 2083",
+    "status": "PAID",
+    "maxLeavesAllowed": 2,
+    "actualLeaves": 1,
+    "deductionType": "AUTO_PER_DAY",
+    "deductionValue": 0,
+    "leaveCutAmount": 0,
+    "createdAt": "2026-06-27T07:19:16.568Z"
+  },
+  {
+    "id": "sal-seed-2",
+    "collegeId": "mock-college-id",
+    "userId": "mock-staff-profile-id",
+    "userName": "Mrs. Sita Devkota",
+    "userRole": "LIBRARIAN",
+    "basicSalary": 40000,
+    "allowances": 2000,
+    "deductions": 500,
+    "payPeriod": "Asar 2083",
+    "status": "PAID",
+    "maxLeavesAllowed": 2,
+    "actualLeaves": 4,
+    "deductionType": "AUTO_PER_DAY",
+    "deductionValue": 0,
+    "leaveCutAmount": 2667,
+    "netSalary": 38833,
+    "createdAt": "2026-06-27T07:19:16.568Z"
+  }
+]

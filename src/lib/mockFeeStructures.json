@@ -1,0 +1,10 @@
+[
+  {
+    "id": "mock-fee-struct-seed",
+    "title": "Tuition Fee - Shrawan 2083",
+    "amount": 8500,
+    "dueDateAD": "2026-07-31T18:30:00.000Z",
+    "dueDateBS": "2083-04-18",
+    "classId": "mock-class-id"
+  }
+]

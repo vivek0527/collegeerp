@@ -1,0 +1,38 @@
+[
+  {
+    "id": "seed-material-1",
+    "title": "Calculus Limits and Continuity Notes",
+    "description": "Basic introduction to limit definitions and limit laws with solved examples.",
+    "fileUrl": "/materials/calculus-limits.pdf",
+    "subjectId": "mock-subject-id",
+    "subjectName": "Mathematics",
+    "subjectCode": "MTH-111",
+    "teacherId": "mock-teacher-id",
+    "teacherName": "Mr. Santosh Dahal",
+    "createdAt": "2026-07-02T06:39:42.974Z"
+  },
+  {
+    "id": "seed-material-2",
+    "title": "Quantum Physics Lecture Slides",
+    "description": "Lecture slides covering wave-particle duality and photo-electric effect.",
+    "fileUrl": "/materials/quantum-intro.pdf",
+    "subjectId": "mock-subject-physics",
+    "subjectName": "Physics",
+    "subjectCode": "PHY-112",
+    "teacherId": "mock-teacher-id",
+    "teacherName": "Mr. Santosh Dahal",
+    "createdAt": "2026-07-02T06:39:42.974Z"
+  },
+  {
+    "id": "local-1782974669434",
+    "title": "derivetive assignment ",
+    "description": "complete the assignment by tommorow",
+    "fileUrl": "/uploads/Executive_Summary__2_-1782974669426.pdf",
+    "subjectId": "mock-subject-id",
+    "subjectName": "Mathematics",
+    "subjectCode": "MTH-111",
+    "teacherId": "mock-teacher-id",
+    "teacherName": "Mr. Santosh Dahal",
+    "createdAt": "2026-07-02T06:44:29.434Z"
+  }
+]
