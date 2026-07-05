@@ -13,6 +13,7 @@ import {
   Server,
   Bell,
 } from 'lucide-react';
+import AcademicCalendarManager from './AcademicCalendarManager';
 
 export default function AdminDashboard({ subPage }: { subPage?: string }) {
   const { formatDate } = useDate();
@@ -32,13 +33,13 @@ export default function AdminDashboard({ subPage }: { subPage?: string }) {
 
   // Mock Users Registry
   const [users, setUsers] = useState<any[]>([
-    { name: 'Admin Administrator', email: 'admin@kmc.edu.np', role: 'ADMIN', status: 'ACTIVE' },
-    { name: 'Prof. Ramesh Bhattarai', email: 'principal@kmc.edu.np', role: 'PRINCIPAL', status: 'ACTIVE' },
-    { name: 'Mr. Santosh Dahal', email: 'teacher@kmc.edu.np', role: 'TEACHER', status: 'ACTIVE' },
-    { name: 'Niranjan Thapa', email: 'student@kmc.edu.np', role: 'STUDENT', status: 'ACTIVE' },
-    { name: 'Miss Laxmi Thapa', email: 'accofficer@kmc.edu.np', role: 'ACCOUNTS_OFFICER', status: 'ACTIVE' },
-    { name: 'Dr. Hari Prasad Sharma', email: 'chairperson@kmc.edu.np', role: 'CHAIRPERSON', status: 'ACTIVE' },
-    { name: 'Mrs. Geeta Adhikari', email: 'vp@kmc.edu.np', role: 'VICE_PRINCIPAL', status: 'ACTIVE' },
+    { name: 'Admin Administrator', email: 'admin@emc.edu.np', role: 'ADMIN', status: 'ACTIVE' },
+    { name: 'Prof. Ramesh Bhattarai', email: 'principal@emc.edu.np', role: 'PRINCIPAL', status: 'ACTIVE' },
+    { name: 'Mr. Santosh Dahal', email: 'teacher@emc.edu.np', role: 'TEACHER', status: 'ACTIVE' },
+    { name: 'Niranjan Thapa', email: 'student@emc.edu.np', role: 'STUDENT', status: 'ACTIVE' },
+    { name: 'Miss Laxmi Thapa', email: 'accofficer@emc.edu.np', role: 'ACCOUNTS_OFFICER', status: 'ACTIVE' },
+    { name: 'Dr. Hari Prasad Sharma', email: 'chairperson@emc.edu.np', role: 'CHAIRPERSON', status: 'ACTIVE' },
+    { name: 'Mrs. Geeta Adhikari', email: 'vp@emc.edu.np', role: 'VICE_PRINCIPAL', status: 'ACTIVE' },
   ]);
 
   // Mock Audit Logs
@@ -307,6 +308,10 @@ export default function AdminDashboard({ subPage }: { subPage?: string }) {
         return renderAuditLogsCard();
       case 'notices':
         return renderNoticesCard();
+      case 'academic-calendar':
+      case 'calendar':
+      case 'events':
+        return <AcademicCalendarManager userRole="Admin" />;
       default:
         return (
           <div className={styles.sectionCard}>

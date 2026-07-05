@@ -18,6 +18,7 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react';
+import AcademicCalendarManager from './AcademicCalendarManager';
 
 export default function TeacherDashboard({ subPage }: { subPage?: string }) {
   const { formatDate } = useDate();
@@ -38,11 +39,13 @@ export default function TeacherDashboard({ subPage }: { subPage?: string }) {
   const [attMsg, setAttMsg] = useState({ text: '', type: '' });
   
   // Interactive Marks States
-  const [selectedStudent, setSelectedStudent] = useState('Niranjan Thapa');
-  const [selectedSubject, setSelectedSubject] = useState('Mathematics');
-  const [marks, setMarks] = useState('');
-  const [remarks, setRemarks] = useState('');
+  const [availableExams, setAvailableExams] = useState<any[]>([]);
+  const [selectedExamId, setSelectedExamId] = useState('');
+  const [selectedClassSubject, setSelectedClassSubject] = useState(''); 
+  const [classStudents, setClassStudents] = useState<any[]>([]);
+  const [studentMarksMap, setStudentMarksMap] = useState<Record<string, { marksObtained: string, remarks: string }>>({});
   const [gradeMsg, setGradeMsg] = useState({ text: '', type: '' });
+  const [loadingStudents, setLoadingStudents] = useState(false);
 
   // Study Materials States
   const [materials, setMaterials] = useState<any[]>([]);
@@ -162,6 +165,12 @@ export default function TeacherDashboard({ subPage }: { subPage?: string }) {
         setNotices(noticeData.notices || []);
       }
 
+      const examRes = await fetch('/api/exams?mode=schedule');
+      if (examRes.ok) {
+        const examData = await examRes.json();
+        setAvailableExams(examData.exams || []);
+      }
+
       const matsRes = await fetch('/api/study-materials');
       if (matsRes.ok) {
         const matsData = await matsRes.json();
@@ -183,6 +192,45 @@ export default function TeacherDashboard({ subPage }: { subPage?: string }) {
   useEffect(() => {
     fetchTeacherData();
   }, []);
+
+  useEffect(() => {
+    if (!selectedClassSubject || !selectedExamId) {
+      setClassStudents([]);
+      setStudentMarksMap({});
+      return;
+    }
+    
+    const fetchStudentsForGrades = async () => {
+      setLoadingStudents(true);
+      try {
+        const { classId, subjectId } = JSON.parse(selectedClassSubject);
+        const res = await fetch(`/api/teacher/students?classId=${classId}&subjectId=${subjectId}&examId=${selectedExamId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setClassStudents(data.students || []);
+          
+          const newMap: Record<string, { marksObtained: string, remarks: string }> = {};
+          (data.students || []).forEach((st: any) => {
+            if (st.result) {
+              newMap[st.id] = {
+                marksObtained: st.result.marksObtained.toString(),
+                remarks: st.result.remarks || ''
+              };
+            } else {
+              newMap[st.id] = { marksObtained: '', remarks: '' };
+            }
+          });
+          setStudentMarksMap(newMap);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingStudents(false);
+      }
+    };
+    
+    fetchStudentsForGrades();
+  }, [selectedClassSubject, selectedExamId]);
 
   const handleStatusChange = (idx: number, status: string) => {
     const updated = [...attendanceSheet];
@@ -208,15 +256,46 @@ export default function TeacherDashboard({ subPage }: { subPage?: string }) {
 
   const submitGrades = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!marks) return;
-    setGradeMsg({ text: 'Submitting grades...', type: 'info' });
+    if (!selectedClassSubject || !selectedExamId) return;
 
-    // Simulate API call to /api/exams action: enterResult
-    setTimeout(() => {
-      setGradeMsg({ text: `Marks of ${marks} submitted for ${selectedStudent} under ${selectedSubject}!`, type: 'success' });
-      setMarks('');
-      setRemarks('');
-    }, 800);
+    setGradeMsg({ text: 'Publishing grades...', type: 'info' });
+    
+    try {
+      const { subjectId } = JSON.parse(selectedClassSubject);
+      
+      const payloadData = Object.keys(studentMarksMap).map(studentId => {
+         const entry = studentMarksMap[studentId];
+         return {
+           studentId,
+           marksObtained: entry.marksObtained,
+           remarks: entry.remarks
+         };
+      }).filter(d => d.marksObtained !== '');
+
+      if (payloadData.length === 0) {
+        setGradeMsg({ text: 'No marks entered to submit!', type: 'error' });
+        return;
+      }
+
+      const res = await fetch('/api/teacher/marks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          examId: selectedExamId,
+          subjectId,
+          marksData: payloadData
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+         setGradeMsg({ text: data.message || 'Grades published successfully!', type: 'success' });
+      } else {
+         setGradeMsg({ text: data.error || 'Failed to publish grades.', type: 'error' });
+      }
+    } catch (e) {
+      setGradeMsg({ text: 'Network error.', type: 'error' });
+    }
   };
 
   if (loading || !profile) {
@@ -348,58 +427,106 @@ export default function TeacherDashboard({ subPage }: { subPage?: string }) {
 
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="grade-student">Select Student</label>
+            <label className={styles.label} htmlFor="grade-class-subject">Select Class & Subject</label>
             <select
-              id="grade-student"
-              value={selectedStudent}
-              onChange={(e) => setSelectedStudent(e.target.value)}
+              id="grade-class-subject"
+              value={selectedClassSubject}
+              onChange={(e) => setSelectedClassSubject(e.target.value)}
             >
-              <option value="Niranjan Thapa">Niranjan Thapa (Roll: 12)</option>
-              <option value="Alok Regmi">Alok Regmi (Roll: 03)</option>
-              <option value="Priya Adhikari">Priya Adhikari (Roll: 24)</option>
+              <option value="">-- Choose Assigned Class & Subject --</option>
+              {(teacher?.subjects || []).map((sub: any) => (
+                <option key={sub.id} value={JSON.stringify({ classId: sub.classId || sub.class?.id, subjectId: sub.id })}>
+                  {sub.class?.name || 'Class'} {sub.class?.section || ''} - {sub.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="grade-subject">Select Subject</label>
+            <label className={styles.label} htmlFor="grade-exam">Select Exam</label>
             <select
-              id="grade-subject"
-              value={selectedSubject}
-              onChange={(e) => setSelectedSubject(e.target.value)}
+              id="grade-exam"
+              value={selectedExamId}
+              onChange={(e) => setSelectedExamId(e.target.value)}
             >
-              <option value="Mathematics">Mathematics (MTH-111)</option>
+              <option value="">-- Choose Exam Term --</option>
+              {availableExams.map((ex: any) => (
+                <option key={ex.id} value={ex.id}>
+                  {ex.name} ({ex.startDateBS || new Date(ex.startDateAD).toLocaleDateString()})
+                </option>
+              ))}
             </select>
           </div>
         </div>
 
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="grade-marks">Marks Obtained (Out of 100)</label>
-            <input
-              id="grade-marks"
-              type="number"
-              step="0.1"
-              placeholder="Enter marks, e.g. 84.5"
-              value={marks}
-              onChange={(e) => setMarks(e.target.value)}
-              required
-            />
+        {selectedClassSubject && selectedExamId ? (
+          loadingStudents ? (
+            <div style={{ padding: '20px', textAlign: 'center' }}>Loading students...</div>
+          ) : classStudents.length === 0 ? (
+            <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-light)' }}>
+              No students found in this class.
+            </div>
+          ) : (
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Marks (Out of 100)</th>
+                    <th>Academic Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {classStudents.map((st) => (
+                    <tr key={st.id}>
+                      <td>{st.rollNumber}</td>
+                      <td><strong>{st.name}</strong></td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.1"
+                          placeholder="e.g. 85.5"
+                          value={studentMarksMap[st.id]?.marksObtained || ''}
+                          onChange={(e) => {
+                             setStudentMarksMap(prev => ({
+                               ...prev,
+                               [st.id]: { ...prev[st.id], marksObtained: e.target.value }
+                             }));
+                          }}
+                          style={{ padding: '6px 10px', fontSize: '0.8rem', width: '120px' }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          placeholder="Analytical thinker, needs practice"
+                          value={studentMarksMap[st.id]?.remarks || ''}
+                          onChange={(e) => {
+                             setStudentMarksMap(prev => ({
+                               ...prev,
+                               [st.id]: { ...prev[st.id], remarks: e.target.value }
+                             }));
+                          }}
+                          style={{ padding: '6px 10px', fontSize: '0.8rem', width: '100%' }}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div style={{ marginTop: '20px' }}>
+                <button type="submit" className="btn-primary" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <Send size={16} />
+                  <span>Save Grades & Publish for Whole Class</span>
+                </button>
+              </div>
+            </div>
+          )
+        ) : (
+          <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-light)', border: '1px dashed #CBD5E1', borderRadius: '8px', marginTop: '16px' }}>
+            Please select a Class, Subject, and Exam Term to open the grading spreadsheet.
           </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label} htmlFor="grade-remarks">Academic Remarks</label>
-            <input
-              id="grade-remarks"
-              type="text"
-              placeholder="E.g. Analytical thinker, needs practice"
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <button type="submit" className="btn-primary" style={{ display: 'flex', gap: '8px', alignSelf: 'flex-start', alignItems: 'center' }}>
-          <Send size={16} />
-          <span>Save Grades & Publish</span>
-        </button>
+        )}
       </form>
     </div>
   );
@@ -748,6 +875,11 @@ export default function TeacherDashboard({ subPage }: { subPage?: string }) {
         return renderNoticesCard();
       case 'uploads':
         return renderUploadsCard();
+      case 'calendar':
+      case 'routine':
+      case 'events':
+      case 'academic-calendar':
+        return <AcademicCalendarManager userRole="Teacher" />;
       default:
         return (
           <div className={styles.sectionCard}>
@@ -805,18 +937,8 @@ export default function TeacherDashboard({ subPage }: { subPage?: string }) {
             </div>
           </div>
 
-          <div className={styles.mainGrid}>
-            {/* Left Side Panel */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {renderAttendanceCard()}
-              {renderMarksCard()}
-            </div>
-
-            {/* Right Side Panel */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {renderNoticesCard()}
-              {renderSalaryCard()}
-            </div>
+          <div style={{ marginTop: '24px' }}>
+            {renderNoticesCard()}
           </div>
         </>
       ) : (

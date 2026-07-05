@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { verifyJWT } from '@/lib/auth';
 import { FeeStatus } from '@prisma/client';
+import { AuditEngine } from '@/lib/auditEngine';
 import fs from 'fs';
 import path from 'path';
 
@@ -17,31 +18,42 @@ export async function GET(request: NextRequest) {
     const studentIdParam = searchParams.get('studentId');
     const mode = searchParams.get('mode'); // 'allocations' | 'history' | 'structures'
 
-    let studentId = studentIdParam;
-
-    // Student default profile lookup
-    if (payload.role === 'STUDENT') {
-      const student = await prisma.student.findUnique({
-        where: { userId: payload.userId },
-      });
-      if (student) studentId = student.id;
-    } else if (payload.role === 'PARENT') {
-      if (!studentIdParam) {
-        const parent = await prisma.parent.findUnique({
-          where: { userId: payload.userId },
-          include: { students: true },
-        });
-        if (parent && parent.students.length > 0) {
-          studentId = parent.students[0].id;
-        }
-      }
-    }
-
     let isDbOnline = true;
     try {
       await prisma.user.findFirst();
     } catch {
       isDbOnline = false;
+    }
+
+    let studentId = studentIdParam;
+
+    if (isDbOnline) {
+      // Student default profile lookup
+      if (payload.role === 'STUDENT') {
+        const student = await prisma.student.findUnique({
+          where: { userId: payload.userId },
+        });
+        if (student) studentId = student.id;
+      } else if (payload.role === 'PARENT') {
+        if (!studentIdParam) {
+          const parent = await prisma.parent.findUnique({
+            where: { userId: payload.userId },
+            include: { students: true },
+          });
+          if (parent && parent.students.length > 0) {
+            studentId = parent.students[0].id;
+          }
+        }
+      }
+    } else {
+      // Mock lookup for offline fallback mode
+      if (payload.role === 'STUDENT') {
+        studentId = 'mock-student-profile-id';
+      } else if (payload.role === 'PARENT') {
+        if (!studentIdParam) {
+          studentId = 'mock-student-profile-id';
+        }
+      }
     }
 
     if (isDbOnline) {
@@ -172,7 +184,39 @@ export async function GET(request: NextRequest) {
       }
 
       if (mode === 'history') {
-        return NextResponse.json({ payments: [] });
+        const PAYMENTS_PATH = path.join(process.cwd(), 'src', 'lib', 'mockPayments.json');
+        let payments = [];
+        if (fs.existsSync(PAYMENTS_PATH)) {
+          payments = JSON.parse(fs.readFileSync(PAYMENTS_PATH, 'utf-8'));
+        } else {
+          payments = [
+            {
+              id: 'mock-pay-1',
+              amount: 5000.0,
+              paymentDateBS: '2083-03-12',
+              paymentDateAD: new Date('2026-06-25').toISOString(),
+              paymentMethod: 'ONLINE',
+              receiptNumber: 'REC-83021',
+              studentId: 'mock-student-profile-id',
+              feeAllocation: {
+                feeStructure: { title: 'Tuition Fee - Shrawan 2083' },
+                student: {
+                  rollNumber: '12',
+                  user: { name: 'Niranjan Thapa' },
+                  class: { name: 'Grade 11', section: 'Science-A' }
+                }
+              }
+            }
+          ];
+          fs.writeFileSync(PAYMENTS_PATH, JSON.stringify(payments, null, 2));
+        }
+
+        // Filter by studentId if query is made from student/parent portal
+        if (studentId) {
+          payments = payments.filter((p: any) => p.studentId === studentId);
+        }
+
+        return NextResponse.json({ payments });
       }
     }
 
@@ -249,14 +293,19 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        // Audit Log
-        await prisma.auditLog.create({
-          data: {
-            collegeId: payload.collegeId,
-            userId: payload.userId,
-            action: 'CREATE_FEE_STRUCTURE',
-            details: `Created Fee Structure: "${title}" of NPR ${parsedAmount} for class ${classId || 'ALL'}`
-          }
+        // Automatic Audit Event Generation via Central AuditEngine
+        await AuditEngine.recordEvent({
+          moduleName: 'ACCOUNTS_OFFICER',
+          entityType: 'FEE_STRUCTURE',
+          entityId: structure.id,
+          referenceNumber: `STRUCT-${structure.id.slice(0, 8)}`,
+          createdBy: payload.name || 'Accounts Officer',
+          userRole: payload.role,
+          actionPerformed: 'FEE_STRUCTURE_GENERATED',
+          newValue: { title, amount: parsedAmount, classId, dueDateBS },
+          reason: `Fee structure "${title}" generated for class ${classId || 'ALL'}.`,
+          amount: parsedAmount,
+          collegeId: payload.collegeId
         });
 
         return NextResponse.json({ success: true, structure });
@@ -269,17 +318,6 @@ export async function POST(request: NextRequest) {
         let structures: any[] = [];
         if (fs.existsSync(STRUCT_PATH)) {
           structures = JSON.parse(fs.readFileSync(STRUCT_PATH, 'utf-8'));
-        } else {
-          structures = [
-            {
-              id: 'mock-fee-struct-seed',
-              title: 'Tuition Fee - Shrawan 2083',
-              amount: 8500,
-              dueDateAD: new Date(2026, 7, 1).toISOString(),
-              dueDateBS: '2083-04-18',
-              classId: 'mock-class-id'
-            }
-          ];
         }
 
         const newStruct = {
@@ -299,7 +337,6 @@ export async function POST(request: NextRequest) {
           allocations = JSON.parse(fs.readFileSync(ALLOC_PATH, 'utf-8'));
         }
 
-        // Mock students
         const mockStudents = [
           { id: 'mock-student-profile-id', name: 'Niranjan Thapa', rollNumber: '12', class: { name: 'Grade 11', section: 'Science-A' } },
           { id: 'stud-2', name: 'Alok Regmi', rollNumber: '03', class: { name: 'Grade 11', section: 'Science-A' } },
@@ -326,6 +363,22 @@ export async function POST(request: NextRequest) {
         });
 
         fs.writeFileSync(ALLOC_PATH, JSON.stringify(allocations, null, 2));
+
+        // Automatic Audit Event Generation via Central AuditEngine
+        await AuditEngine.recordEvent({
+          moduleName: 'ACCOUNTS_OFFICER',
+          entityType: 'FEE_STRUCTURE',
+          entityId: newStruct.id,
+          referenceNumber: `STRUCT-${newStruct.id.slice(0, 8)}`,
+          createdBy: payload.name || 'Accounts Officer',
+          userRole: payload.role,
+          actionPerformed: 'FEE_STRUCTURE_GENERATED',
+          newValue: { title, amount: parsedAmount, classId, dueDateBS },
+          reason: `Fee structure "${title}" generated for class ${classId || 'ALL'}.`,
+          amount: parsedAmount,
+          collegeId: payload.collegeId
+        });
+
         return NextResponse.json({ success: true, structure: newStruct });
       }
     }
@@ -340,7 +393,7 @@ export async function POST(request: NextRequest) {
     if (isDbOnline) {
       const allocation = await prisma.feeAllocation.findUnique({
         where: { id: feeAllocationId },
-        include: { feeStructure: true },
+        include: { feeStructure: true, student: { include: { user: true } } },
       });
 
       if (!allocation) {
@@ -378,13 +431,21 @@ export async function POST(request: NextRequest) {
         }),
       ]);
 
-      await prisma.auditLog.create({
-        data: {
-          collegeId: payload.collegeId,
-          userId: payload.userId,
-          action: 'COLLECT_FEE',
-          details: `Collected NPR ${payAmt} for bill "${allocation.feeStructure.title}", Receipt: ${receiptNumber}`,
-        },
+      // Automatic Audit Event Generation via Central AuditEngine
+      await AuditEngine.recordEvent({
+        moduleName: 'ACCOUNTS_OFFICER',
+        entityType: 'PAYMENT',
+        entityId: payment.id,
+        referenceNumber: receiptNumber,
+        studentId: allocation.studentId,
+        createdBy: payload.name || 'Accounts Officer',
+        userRole: payload.role,
+        actionPerformed: 'PAYMENT_COLLECTED',
+        previousValue: { dueAmount: allocation.dueAmount, status: allocation.status },
+        newValue: { amountPaid: payAmt, dueAmount: newDueAmount, status: newStatus, paymentMethod, receiptNumber },
+        reason: `Collected NPR ${payAmt} for bill "${allocation.feeStructure.title}", Receipt: ${receiptNumber}`,
+        amount: payAmt,
+        collegeId: payload.collegeId
       });
 
       return NextResponse.json({ success: true, payment });
@@ -410,14 +471,49 @@ export async function POST(request: NextRequest) {
       allocations[idx] = allocation;
       fs.writeFileSync(ALLOC_PATH, JSON.stringify(allocations, null, 2));
 
+      // Save to mock payments list
+      const PAYMENTS_PATH = path.join(process.cwd(), 'src', 'lib', 'mockPayments.json');
+      let payments = [];
+      if (fs.existsSync(PAYMENTS_PATH)) {
+        payments = JSON.parse(fs.readFileSync(PAYMENTS_PATH, 'utf-8'));
+      }
+      const receiptNumber = `REC-MOCK-${Date.now()}`;
+      const newPayment = {
+        id: `pay-local-${Date.now()}`,
+        amount: payAmt,
+        paymentDateBS,
+        paymentDateAD: new Date().toISOString(),
+        paymentMethod,
+        receiptNumber,
+        studentId: allocation.studentId,
+        feeAllocation: {
+          feeStructure: { title: allocation.feeStructure.title },
+          student: allocation.student
+        }
+      };
+      payments.push(newPayment);
+      fs.writeFileSync(PAYMENTS_PATH, JSON.stringify(payments, null, 2));
+
+      // Automatic Audit Event Generation via Central AuditEngine
+      await AuditEngine.recordEvent({
+        moduleName: 'ACCOUNTS_OFFICER',
+        entityType: 'PAYMENT',
+        entityId: newPayment.id,
+        referenceNumber: receiptNumber,
+        studentId: allocation.studentId,
+        createdBy: payload.name || 'Accounts Officer',
+        userRole: payload.role,
+        actionPerformed: 'PAYMENT_COLLECTED',
+        previousValue: { dueAmount: allocation.dueAmount + payAmt },
+        newValue: { amountPaid: payAmt, dueAmount: allocation.dueAmount, paymentMethod, receiptNumber },
+        reason: `Collected NPR ${payAmt} for bill "${allocation.feeStructure.title}", Receipt: ${receiptNumber}`,
+        amount: payAmt,
+        collegeId: payload.collegeId
+      });
+
       return NextResponse.json({
         success: true,
-        payment: {
-          receiptNumber: `REC-MOCK-${Date.now()}`,
-          amount: payAmt,
-          paymentDateBS,
-          paymentMethod
-        }
+        payment: newPayment
       });
     }
   } catch (error) {

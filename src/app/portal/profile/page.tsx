@@ -302,7 +302,7 @@ function ProfileCard() {
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
               <InfoItem icon={<Mail size={16} />} label="Email Address" value={profile.email} />
-              <InfoItem icon={<Building size={16} />} label="Campus Institute" value={profile.college?.name || 'Kathmandu Model College'} />
+              <InfoItem icon={<Building size={16} />} label="Campus Institute" value={profile.college?.name || 'Everest College'} />
               <InfoItem icon={<Shield size={16} />} label="Access Role Level" value={roleName} />
               <InfoItem icon={<Calendar size={16} />} label="System Timezone" value={profile.college?.timezone || 'Asia/Kathmandu'} />
             </div>

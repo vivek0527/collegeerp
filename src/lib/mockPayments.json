@@ -1,0 +1,26 @@
+[
+  {
+    "id": "mock-pay-1",
+    "amount": 5000,
+    "paymentDateBS": "2083-03-12",
+    "paymentDateAD": "2026-06-25T00:00:00.000Z",
+    "paymentMethod": "ONLINE",
+    "receiptNumber": "REC-83021",
+    "studentId": "mock-student-profile-id",
+    "feeAllocation": {
+      "feeStructure": {
+        "title": "Tuition Fee - Shrawan 2083"
+      },
+      "student": {
+        "rollNumber": "12",
+        "user": {
+          "name": "Niranjan Thapa"
+        },
+        "class": {
+          "name": "Grade 11",
+          "section": "Science-A"
+        }
+      }
+    }
+  }
+]

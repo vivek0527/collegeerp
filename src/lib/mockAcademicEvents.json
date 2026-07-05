@@ -1,0 +1,35 @@
+[
+  {
+    "id": "event-1",
+    "title": "Public Holiday - Campus Closed",
+    "dateAD": "2026-07-05",
+    "dateBS": "2083 Asar 21",
+    "type": "HOLIDAY",
+    "isEmergency": false,
+    "description": "Official campus public holiday.",
+    "createdBy": "Principal",
+    "createdAt": "2026-07-01T08:00:00Z"
+  },
+  {
+    "id": "event-2",
+    "title": "First Term Examination Routine",
+    "dateAD": "2026-07-12",
+    "dateBS": "2083 Asar 28",
+    "type": "EXAM",
+    "isEmergency": false,
+    "description": "Terminal examinations begin for all departments.",
+    "createdBy": "Exam Dept",
+    "createdAt": "2026-07-01T08:00:00Z"
+  },
+  {
+    "id": "event-3",
+    "title": "Monthly Fee Clearance Deadline",
+    "dateAD": "2026-07-18",
+    "dateBS": "2083 Shrawan 03",
+    "type": "FEE_DUE",
+    "isEmergency": false,
+    "description": "Deadline for tuition fee installment clearance.",
+    "createdBy": "Accounts Head",
+    "createdAt": "2026-07-01T08:00:00Z"
+  }
+]

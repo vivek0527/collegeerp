@@ -5,8 +5,9 @@ import styles from './DashboardComponents.module.css';
 import {
   UserPlus, Users, UserCheck, PhoneCall,
   CheckCircle, XCircle, Clock, Eye, Loader,
-  RefreshCw, LayoutDashboard, Copy, Search
+  RefreshCw, LayoutDashboard, Copy, Search, ShieldCheck, Activity
 } from 'lucide-react';
+import AcademicCalendarManager from './AcademicCalendarManager';
 
 const CLASSES = [
   'Grade 11 Science-A', 'Grade 11 Science-B',
@@ -15,16 +16,16 @@ const CLASSES = [
   'Grade 12 Commerce-A', 'Grade 12 Commerce-B', 'Grade 12 Arts',
 ];
 
-type Tab = 'register' | 'students' | 'attendance' | 'absent';
+type Tab = 'register' | 'students' | 'attendance' | 'absent' | 'calendar';
 
 export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
   const activeTab: Tab =
     subPage === 'students' ? 'students'
     : subPage === 'attendance' ? 'attendance'
     : subPage === 'absent' ? 'absent'
+    : subPage === 'calendar' ? 'calendar'
     : 'register';
 
-  const [tab, setTab] = useState<Tab>(activeTab);
   const [profile, setProfile] = useState<any>(null);
 
   // Students list
@@ -40,6 +41,7 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
   // Absent
   const [absentList, setAbsentList] = useState<any[]>([]);
   const [absentLoading, setAbsentLoading] = useState(false);
+  const [absentSearchQuery, setAbsentSearchQuery] = useState('');
 
   // Registration form
   const [regMsg, setRegMsg] = useState({ text: '', type: '' });
@@ -59,21 +61,68 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
   const [pPhone, setPPhone] = useState('');
   const [pPassword, setPPassword] = useState('');
   const [pOccupation, setPOccupation] = useState('');
+  
+  // Financial (Scholarship)
+  const [schemes, setSchemes] = useState<any[]>([]);
+  const [sSchemeId, setSSchemeId] = useState('');
+  const [sScholarshipRemarks, setSScholarshipRemarks] = useState('');
+
+  // Portal status & new fields
+  const [isAdmissionOpen, setIsAdmissionOpen] = useState(true);
+  const [activeAy, setActiveAy] = useState('2083-2084 BS');
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [sessionDepts, setSessionDepts] = useState<any[]>([]);
+  const [sDept, setSDept] = useState('Computer Science & IT (BSc CSIT)');
+  const [sShift, setSShift] = useState('Day');
+  const [sSeeGpa, setSSeeGpa] = useState('');
+  const [sEntranceMark, setSEntranceMark] = useState('');
 
   // Attendance filter
   const [attFilter, setAttFilter] = useState('ALL');
 
   useEffect(() => {
     fetch('/api/auth/me').then(r => r.ok ? r.json() : null).then(d => d && setProfile(d.user));
+    
+    // Fetch Academic Sessions & Department Admission switches
+    fetch('/api/academic-sessions')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.sessions) {
+          const active = d.sessions.find((s: any) => s.isActive) || d.sessions[0];
+          if (active) {
+            setIsAdmissionOpen(active.isAdmissionOpen !== false);
+            if (active.sessionName) setActiveAy(active.sessionName);
+            if (active.departments && active.departments.length > 0) {
+              setSessionDepts(active.departments);
+              const openDept = active.departments.find((dep: any) => dep.isAdmissionOpen) || active.departments[0];
+              if (openDept) setSDept(openDept.name);
+            }
+          }
+        }
+      });
+
+    // Fetch Dynamic Departments
+    fetch('/api/departments')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.departments && d.departments.length > 0) {
+          setDepartments(d.departments);
+          setSDept(d.departments[0].name);
+        }
+      });
+
+    // Fetch Scholarship Schemes
+    fetch('/api/scholarship-schemes').then(r => r.ok ? r.json() : null).then(d => d && setSchemes(d.schemes || []));
+
     loadAttendance();
     loadAbsent();
   }, []);
 
   useEffect(() => {
-    if (tab === 'students') loadStudents();
-    if (tab === 'attendance') loadAttendance();
-    if (tab === 'absent') loadAbsent();
-  }, [tab]);
+    if (activeTab === 'students') loadStudents();
+    if (activeTab === 'attendance') loadAttendance();
+    if (activeTab === 'absent') loadAbsent();
+  }, [activeTab]);
 
   const loadStudents = async () => {
     setStudentsLoading(true);
@@ -126,10 +175,13 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           studentName: sName, studentEmail: sEmail, studentPhone: sPhone,
-          studentPassword: sPassword, rollNumber: sRoll, admissionNumber: sAdmNo,
-          className: sClass, dateOfBirthBS: sDob,
+          studentPassword: sPassword, admissionNumber: sAdmNo,
+          dateOfBirthBS: sDob,
+          department: sDept, shift: sShift, seeGpa: sSeeGpa, entranceMark: sEntranceMark,
+          academicYear: activeAy,
           parentName: pName, parentEmail: pEmail, parentPhone: pPhone,
           parentPassword: pPassword, parentOccupation: pOccupation,
+          scholarshipSchemeId: sSchemeId, scholarshipRemarks: sScholarshipRemarks,
         }),
       });
       const data = await res.json();
@@ -137,8 +189,9 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
         setRegMsg({ text: `✅ Registration successful! Student: ${sEmail} | Parent: ${pEmail}`, type: 'success' });
         // Reset form
         setSName(''); setSEmail(''); setSPhone(''); setSPassword('');
-        setSRoll(''); setSAdmNo(''); setSClass(CLASSES[0]); setSdob('');
+        setSAdmNo(''); setSdob(''); setSSeeGpa(''); setSEntranceMark('');
         setPName(''); setPEmail(''); setPPhone(''); setPPassword(''); setPOccupation('');
+        setSSchemeId(''); setSScholarshipRemarks('');
         loadStudents();
       } else {
         setRegMsg({ text: data.error || 'Registration failed.', type: 'error' });
@@ -210,6 +263,37 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
     { id: 'absent', label: 'Absent Today', icon: <PhoneCall size={16} /> },
   ];
 
+  const studentQuery = studentSearchQuery.toLowerCase().trim();
+  const filteredStudents = students.filter(s => {
+    if (!studentQuery) return true;
+    const sName = (s.user?.name || s.studentName || '').toLowerCase();
+    const roll = (s.rollNumber || '').toLowerCase();
+    const adm = (s.admissionNumber || '').toLowerCase();
+    const cls = `${s.class?.name || ''} ${s.class?.section || ''}`.toLowerCase();
+    const sEmail = (s.user?.email || s.studentEmail || '').toLowerCase();
+    const pName = (s.parent?.user?.name || s.parentName || '').toLowerCase();
+    const pPhone = (s.parent?.phone || s.parentPhone || '').toLowerCase();
+    const pEmail = (s.parent?.user?.email || s.parentEmail || '').toLowerCase();
+    return sName.includes(studentQuery) || roll.includes(studentQuery) || adm.includes(studentQuery) ||
+           cls.includes(studentQuery) || sEmail.includes(studentQuery) || pName.includes(studentQuery) ||
+           pPhone.includes(studentQuery) || pEmail.includes(studentQuery);
+  });
+
+  const absentQuery = absentSearchQuery.toLowerCase().trim();
+  const filteredAbsent = absentList.filter(a => {
+    if (!absentQuery) return true;
+    return (a.studentName || '').toLowerCase().includes(absentQuery) ||
+           (a.rollNumber || '').toLowerCase().includes(absentQuery) ||
+           (a.parentName || '').toLowerCase().includes(absentQuery) ||
+           (a.parentPhone || '').toLowerCase().includes(absentQuery);
+  });
+  const groupedAbsent = filteredAbsent.reduce((acc, curr) => {
+    const cName = curr.className || 'Unknown Class';
+    if (!acc[cName]) acc[cName] = [];
+    acc[cName].push(curr);
+    return acc;
+  }, {} as Record<string, any[]>);
+
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -225,33 +309,9 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div style={{
-        display: 'flex', gap: '4px', background: '#F1F5F9',
-        padding: '4px', borderRadius: '12px', flexWrap: 'wrap'
-      }}>
-        {tabs.map(t => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '8px 16px', borderRadius: '9px', border: 'none',
-              cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700,
-              flex: '1 1 auto', justifyContent: 'center',
-              background: tab === t.id ? '#fff' : 'transparent',
-              color: tab === t.id ? '#6366F1' : '#64748B',
-              boxShadow: tab === t.id ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
-              transition: 'all 0.2s'
-            }}
-          >
-            {t.icon} {t.label}
-          </button>
-        ))}
-      </div>
 
       {/* ─── Tab: Register Student ─── */}
-      {tab === 'register' && (
+      {activeTab === 'register' && (
         <div className={styles.sectionCard}>
           <div className={styles.cardHeader}>
             <h3 className={styles.cardTitle}>
@@ -260,6 +320,18 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
             </h3>
           </div>
 
+          {!isAdmissionOpen ? (
+            <div style={{
+              padding: '24px', borderRadius: '12px', background: '#FEF2F2', border: '2px solid #FCA5A5',
+              color: '#991B1B', fontWeight: 800, fontSize: '1.05rem', margin: '20px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center'
+            }}>
+              <XCircle size={48} color="#DC2626" />
+              <span>THE ADMISSION PORTAL IS CURRENTLY LOCKED</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#DC2626', maxWidth: '600px' }}>
+                Executive Management (Principal/VP/Chairman) has turned OFF the admissions for the active session ({activeAy}). New student registrations cannot be processed at this time.
+              </span>
+            </div>
+          ) : (
           <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '12px' }}>
             {regMsg.text && (
               <div style={{
@@ -324,18 +396,41 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
                   </div>
                 </div>
                 <div>
-                  <label style={labelStyle}>Roll Number *</label>
-                  <input style={inputStyle} value={sRoll} onChange={e => setSRoll(e.target.value)} placeholder="01" required />
-                </div>
-                <div>
                   <label style={labelStyle}>Admission Number *</label>
                   <input style={inputStyle} value={sAdmNo} onChange={e => setSAdmNo(e.target.value)} placeholder="ADM-2083-001" required />
                 </div>
                 <div>
-                  <label style={labelStyle}>Class / Section *</label>
-                  <select style={{ ...inputStyle }} value={sClass} onChange={e => setSClass(e.target.value)}>
-                    {CLASSES.map(c => <option key={c} value={c}>{c}</option>)}
+                  <label style={labelStyle}>Offered Department / Program *</label>
+                  <select style={inputStyle} value={sDept} onChange={e => setSDept(e.target.value)}>
+                    {sessionDepts.length > 0 ? (
+                      sessionDepts.map((d: any) => (
+                        <option key={d.id} value={d.name} disabled={!d.isAdmissionOpen}>
+                          {d.name} ({d.duration || '4 Years'}) {d.isAdmissionOpen ? '— ADMISSION OPEN' : '— PORTAL CLOSED (OFF)'}
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="Computer Science & IT (BSc CSIT)">Computer Science &amp; IT (BSc CSIT) — ADMISSION OPEN</option>
+                        <option value="Business Administration (BBA)">Business Administration (BBA) — ADMISSION OPEN</option>
+                        <option value="Computer Applications (BCA)" disabled>Computer Applications (BCA) — PORTAL CLOSED (OFF)</option>
+                      </>
+                    )}
                   </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>Shift *</label>
+                  <select style={inputStyle} value={sShift} onChange={e => setSShift(e.target.value)}>
+                    <option value="Day">Day Shift</option>
+                    <option value="Morning">Morning Shift</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>SEE GPA (10th) *</label>
+                  <input style={inputStyle} type="number" step="0.01" min="0" max="4.0" value={sSeeGpa} onChange={e => setSSeeGpa(e.target.value)} placeholder="e.g. 3.85" required />
+                </div>
+                <div>
+                  <label style={labelStyle}>Entrance Mark *</label>
+                  <input style={inputStyle} type="number" min="0" max="100" value={sEntranceMark} onChange={e => setSEntranceMark(e.target.value)} placeholder="e.g. 85" required />
                 </div>
                 <div>
                   <label style={labelStyle}>Date of Birth (BS)</label>
@@ -405,6 +500,37 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
               </div>
             </div>
 
+            {/* Initial Financial / Scholarship Section */}
+            <div style={{
+              padding: '16px', borderRadius: '10px',
+              border: '2px solid #E0E7FF', background: '#EEF2FF',
+              marginTop: '20px', marginBottom: '20px'
+            }}>
+              <h4 style={{ fontSize: '0.88rem', fontWeight: 800, color: '#3730A3', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                🎓 Initial Financial Grants & Scholarships
+                <span style={{ fontSize: '0.7rem', fontWeight: 600, color: '#6366F1', background: '#E0E7FF', padding: '2px 8px', borderRadius: '20px', marginLeft: '4px' }}>
+                  Auto-Audited
+                </span>
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '14px' }}>
+                <div>
+                  <label style={labelStyle}>Select Authorized Scheme</label>
+                  <select style={inputStyle} value={sSchemeId} onChange={e => setSSchemeId(e.target.value)}>
+                    <option value="">No Scholarship (Full Fee)</option>
+                    {schemes.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} ({s.discountType === 'PERCENTAGE' ? `${s.discountValue}% Off` : `NPR ${s.discountValue}`})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={labelStyle}>Scholarship Remarks / Justification</label>
+                  <input style={inputStyle} value={sScholarshipRemarks} onChange={e => setSScholarshipRemarks(e.target.value)} placeholder="e.g. Approved by Principal via letter..." />
+                </div>
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={regLoading}
@@ -415,30 +541,13 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
               {regLoading ? 'Registering...' : 'Complete Admission Registration'}
             </button>
           </form>
+          )}
         </div>
       )}
 
       {/* ─── Tab: All Students ─── */}
-      {tab === 'students' && (() => {
-        const query = studentSearchQuery.toLowerCase().trim();
-        const filteredStudents = students.filter(s => {
-          if (!query) return true;
-          const sName = (s.user?.name || s.studentName || '').toLowerCase();
-          const roll = (s.rollNumber || '').toLowerCase();
-          const adm = (s.admissionNumber || '').toLowerCase();
-          const cls = `${s.class?.name || ''} ${s.class?.section || ''}`.toLowerCase();
-          const sEmail = (s.user?.email || s.studentEmail || '').toLowerCase();
-          const pName = (s.parent?.user?.name || s.parentName || '').toLowerCase();
-          const pPhone = (s.parent?.phone || s.parentPhone || '').toLowerCase();
-          const pEmail = (s.parent?.user?.email || s.parentEmail || '').toLowerCase();
-
-          return sName.includes(query) || roll.includes(query) || adm.includes(query) ||
-                 cls.includes(query) || sEmail.includes(query) || pName.includes(query) ||
-                 pPhone.includes(query) || pEmail.includes(query);
-        });
-
-        return (
-          <div className={styles.sectionCard}>
+      {activeTab === 'students' && (
+        <div className={styles.sectionCard}>
             <div className={styles.cardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
               <h3 className={styles.cardTitle}>
                 <Users size={18} className="text-primary" />
@@ -523,11 +632,10 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
               </div>
             )}
           </div>
-        );
-      })()}
+      )}
 
       {/* ─── Tab: Attendance Monitor ─── */}
-      {tab === 'attendance' && (
+      {activeTab === 'attendance' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Summary Cards */}
           {attendanceSummary && (
@@ -624,7 +732,7 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
       )}
 
       {/* ─── Tab: Absent Today ─── */}
-      {tab === 'absent' && (
+      {activeTab === 'absent' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{
             padding: '14px 18px', borderRadius: '10px',
@@ -639,9 +747,31 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
                 Contact parents immediately to notify absence
               </div>
             </div>
-            <button onClick={loadAbsent} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', border: '1px solid #FCA5A5', background: '#fff', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
-              <RefreshCw size={14} /> Refresh
-            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              {/* Search Input */}
+              <div style={{ position: 'relative', minWidth: '220px' }}>
+                <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#F87171' }} />
+                <input
+                  type="text"
+                  value={absentSearchQuery}
+                  onChange={e => setAbsentSearchQuery(e.target.value)}
+                  placeholder="Search absent students..."
+                  style={{
+                    padding: '7px 12px 7px 36px',
+                    borderRadius: '8px',
+                    border: '1px solid #FCA5A5',
+                    outline: 'none',
+                    fontSize: '0.82rem',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+              <button onClick={loadAbsent} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', border: '1px solid #FCA5A5', background: '#fff', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
+                <RefreshCw size={14} /> Refresh
+              </button>
+            </div>
           </div>
 
           {absentLoading ? (
@@ -651,59 +781,68 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
               <CheckCircle size={40} style={{ marginBottom: '12px', opacity: 0.6 }} />
               <div style={{ fontWeight: 700, fontSize: '1rem' }}>All students are present today! 🎉</div>
             </div>
+          ) : Object.keys(groupedAbsent).length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '32px', color: '#94A3B8' }}>No matching students found for "{absentSearchQuery}"</div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '14px' }}>
-              {absentList.map((a, i) => (
-                <div key={i} style={{
-                  background: '#fff', borderRadius: '12px',
-                  border: '1px solid #FEE2E2',
-                  padding: '16px 18px',
-                  boxShadow: '0 2px 8px rgba(239,68,68,0.08)'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: '0.92rem', color: '#1E293B' }}>{a.studentName}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748B', marginTop: '2px' }}>
-                        {a.className} &nbsp;|&nbsp; Roll: {a.rollNumber}
-                      </div>
-                    </div>
-                    <span style={{
-                      padding: '3px 10px', borderRadius: '20px',
-                      background: '#FEF2F2', color: '#DC2626',
-                      fontSize: '0.72rem', fontWeight: 800
-                    }}>ABSENT</span>
-                  </div>
-
-                  <div style={{
-                    padding: '10px 12px', borderRadius: '8px',
-                    background: '#F8FAFC', border: '1px solid #E2E8F0'
-                  }}>
-                    <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600, marginBottom: '6px' }}>👨‍👩‍👧 Parent / Guardian</div>
-                    <div style={{ fontWeight: 700, fontSize: '0.87rem', color: '#1E293B' }}>{a.parentName}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '6px' }}>
-                      <a
-                        href={`tel:${a.parentPhone}`}
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '6px',
-                          padding: '6px 14px', borderRadius: '8px',
-                          background: 'linear-gradient(135deg, #16A34A, #15803D)',
-                          color: '#fff', textDecoration: 'none',
-                          fontSize: '0.82rem', fontWeight: 700
-                        }}
-                      >
-                        <PhoneCall size={14} /> {a.parentPhone}
-                      </a>
-                      <button
-                        onClick={() => navigator.clipboard.writeText(a.parentPhone)}
-                        style={{ background: 'none', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '5px 8px', cursor: 'pointer', color: '#64748B', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}
-                        title="Copy number"
-                      >
-                        <Copy size={12} /> Copy
-                      </button>
-                    </div>
-                    {a.parentEmail && a.parentEmail !== '—' && (
-                      <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginTop: '6px' }}>{a.parentEmail}</div>
-                    )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {(Object.entries(groupedAbsent) as [string, any[]][]).map(([className, students]) => (
+                <div key={className} style={{ background: '#fff', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', color: '#334155', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Users size={18} color="#6366F1" />
+                    {className}
+                    <span style={{ background: '#EEF2FF', color: '#4338CA', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700 }}>
+                      {students.length} Absent
+                    </span>
+                  </h4>
+                  
+                  <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          <th>Student Name</th>
+                          <th>Roll No</th>
+                          <th>Status</th>
+                          <th>Parent Name</th>
+                          <th>Parent Contact</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {students.map((a, i) => (
+                          <tr key={i}>
+                            <td><strong>{a.studentName}</strong></td>
+                            <td>{a.rollNumber}</td>
+                            <td>
+                              <span style={{
+                                padding: '3px 10px', borderRadius: '20px',
+                                background: '#FEF2F2', color: '#DC2626',
+                                fontSize: '0.72rem', fontWeight: 800
+                              }}>ABSENT</span>
+                            </td>
+                            <td>{a.parentName}</td>
+                            <td style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <a
+                                href={`tel:${a.parentPhone}`}
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                  padding: '4px 10px', borderRadius: '6px',
+                                  background: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0',
+                                  textDecoration: 'none', fontSize: '0.75rem', fontWeight: 700
+                                }}
+                              >
+                                <PhoneCall size={12} /> {a.parentPhone}
+                              </a>
+                              <button
+                                onClick={() => navigator.clipboard.writeText(a.parentPhone)}
+                                style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', color: '#64748B', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                title="Copy number"
+                              >
+                                <Copy size={12} /> Copy
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               ))}
@@ -711,6 +850,8 @@ export default function ReceptionDashboard({ subPage }: { subPage?: string }) {
           )}
         </div>
       )}
+
+      {activeTab === 'calendar' && <AcademicCalendarManager userRole="Reception" />}
     </div>
   );
 }

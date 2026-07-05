@@ -15,10 +15,22 @@
   will-change: margin-left;
 }
 
+@media (max-width: 1024px) {
+  .mainWrapper {
+    margin-left: 0 !important;
+  }
+}
+
 .content {
   padding: 30px;
   flex: 1;
   background-color: var(--bg-main);
+}
+
+@media (max-width: 600px) {
+  .content {
+    padding: 16px; /* Tighter padding for phones */
+  }
 }
 
 /* ── Loading Screen ─────────────── */
@@ -49,4 +61,17 @@
   color: var(--text-muted);
   font-size: 0.95rem;
   font-weight: 500;
+}
+/* Calendar Split Layout */
+.calendarSplitLayout {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .calendarSplitLayout {
+    grid-template-columns: 1fr;
+  }
 }

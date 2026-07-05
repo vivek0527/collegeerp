@@ -4,8 +4,8 @@
     "collegeId": "mock-college-id",
     "studentId": "mock-student-profile-id",
     "feeStructureId": "mock-fee-struct-seed",
-    "amountPaid": 5000,
-    "dueAmount": 3500,
+    "amountPaid": 8000,
+    "dueAmount": 500,
     "status": "PARTIAL",
     "createdAt": "2026-07-02T07:07:02.232Z",
     "feeStructure": {

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from './DashboardComponents.module.css';
 import { useDate } from '../DateContext';
+import AcademicCalendarManager from './AcademicCalendarManager';
 import {
   CreditCard,
   DollarSign,
@@ -12,6 +13,25 @@ import {
   FileText,
   User,
   Trash2,
+  Users,
+  ShieldCheck,
+  AlertTriangle,
+  FileSpreadsheet,
+  Printer,
+  Download,
+  CheckSquare,
+  XCircle,
+  HelpCircle,
+  Lock,
+  PieChart,
+  BarChart3,
+  Eye,
+  RefreshCw,
+  FileCheck,
+  Layers,
+  Filter,
+  AlertOctagon,
+  Check,
 } from 'lucide-react';
 
 export default function AccountsDashboard({ subPage }: { subPage?: string }) {
@@ -24,7 +44,40 @@ export default function AccountsDashboard({ subPage }: { subPage?: string }) {
   const [feeAllocations, setFeeAllocations] = useState<any[]>([]);
   const [salaries, setSalaries] = useState<any[]>([]);
   const [autoConfigs, setAutoConfigs] = useState<any[]>([]);
-  
+  const [payments, setPayments] = useState<any[]>([]);
+
+  // Advanced search/filters states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterClass, setFilterClass] = useState('ALL');
+  const [filterPaymentStatus, setFilterPaymentStatus] = useState('ALL');
+  const activeTab = subPage?.toLowerCase() || 'dashboard';
+
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
+
+  // Financial Audit Module States
+  const [auditSubTab, setAuditSubTab] = useState('dashboard');
+  const [auditMetrics, setAuditMetrics] = useState<any>(null);
+  const [auditTransactions, setAuditTransactions] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [cashRecons, setCashRecons] = useState<any[]>([]);
+  const [bankRecons, setBankRecons] = useState<any[]>([]);
+  const [scholarshipAudits, setScholarshipAudits] = useState<any[]>([]);
+  const [refundAudits, setRefundAudits] = useState<any[]>([]);
+  const [suspiciousList, setSuspiciousList] = useState<any[]>([]);
+  const [vaultDocs, setVaultDocs] = useState<any[]>([]);
+  const [complianceData, setComplianceData] = useState<any>(null);
+
+  // Audit filter states
+  const [auditSearch, setAuditSearch] = useState('');
+  const [auditDeptFilter, setAuditDeptFilter] = useState('ALL');
+  const [auditMethodFilter, setAuditMethodFilter] = useState('ALL');
+  const [auditVerifFilter, setAuditVerifFilter] = useState('ALL');
+
+  // Approval Modal state
+  const [selectedAuditTx, setSelectedAuditTx] = useState<any>(null);
+  const [auditRemarksText, setAuditRemarksText] = useState('');
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+
   // Form State
   const [selectedAllocationId, setSelectedAllocationId] = useState('');
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -121,6 +174,13 @@ export default function AccountsDashboard({ subPage }: { subPage?: string }) {
         setFeeAllocations(allocData.allocations || []);
       }
 
+      // Fetch payment receipt history
+      const historyRes = await fetch('/api/fees?mode=history');
+      if (historyRes.ok) {
+        const historyData = await historyRes.json();
+        setPayments(historyData.payments || []);
+      }
+
       // Fetch salaries payroll
       const salRes = await fetch('/api/salaries');
       if (salRes.ok) {
@@ -143,6 +203,58 @@ export default function AccountsDashboard({ subPage }: { subPage?: string }) {
       if (configRes.ok) {
         const configData = await configRes.json();
         setAutoConfigs(configData.configs || []);
+      }
+
+      // Fetch Financial Audit Data
+      const auditDashRes = await fetch('/api/financial-audit?mode=dashboard');
+      if (auditDashRes.ok) {
+        const d = await auditDashRes.json();
+        setAuditMetrics(d.metrics || null);
+      }
+      const auditTxRes = await fetch('/api/financial-audit?mode=transactions');
+      if (auditTxRes.ok) {
+        const d = await auditTxRes.json();
+        setAuditTransactions(d.transactions || []);
+      }
+      const auditLogRes = await fetch('/api/financial-audit?mode=audit-logs');
+      if (auditLogRes.ok) {
+        const d = await auditLogRes.json();
+        setAuditLogs(d.auditLogs || []);
+      }
+      const cashReconRes = await fetch('/api/financial-audit?mode=cash-recon');
+      if (cashReconRes.ok) {
+        const d = await cashReconRes.json();
+        setCashRecons(d.reconciliations || []);
+      }
+      const bankReconRes = await fetch('/api/financial-audit?mode=bank-recon');
+      if (bankReconRes.ok) {
+        const d = await bankReconRes.json();
+        setBankRecons(d.reconciliations || []);
+      }
+      const schRes = await fetch('/api/financial-audit?mode=scholarship-audit');
+      if (schRes.ok) {
+        const d = await schRes.json();
+        setScholarshipAudits(d.scholarships || []);
+      }
+      const refRes = await fetch('/api/financial-audit?mode=refund-audit');
+      if (refRes.ok) {
+        const d = await refRes.json();
+        setRefundAudits(d.refunds || []);
+      }
+      const suspRes = await fetch('/api/financial-audit?mode=suspicious');
+      if (suspRes.ok) {
+        const d = await suspRes.json();
+        setSuspiciousList(d.suspiciousActivities || []);
+      }
+      const vaultRes = await fetch('/api/financial-audit?mode=vault');
+      if (vaultRes.ok) {
+        const d = await vaultRes.json();
+        setVaultDocs(d.vaultDocuments || []);
+      }
+      const compRes = await fetch('/api/financial-audit?mode=compliance');
+      if (compRes.ok) {
+        const d = await compRes.json();
+        setComplianceData(d.complianceSummary || null);
       }
     } catch (e) {
       console.error(e);
@@ -353,6 +465,12 @@ export default function AccountsDashboard({ subPage }: { subPage?: string }) {
           const allocData = await allocRes.json();
           setFeeAllocations(allocData.allocations || []);
         }
+        // Reload history payments
+        const historyRes = await fetch('/api/fees?mode=history');
+        if (historyRes.ok) {
+          const historyData = await historyRes.json();
+          setPayments(historyData.payments || []);
+        }
       } else {
         setFormMsg({ text: data.error || 'Failed to process payment.', type: 'error' });
       }
@@ -451,94 +569,416 @@ export default function AccountsDashboard({ subPage }: { subPage?: string }) {
     );
   };
 
-  const renderPaymentDeskCard = () => (
-    <div className={styles.sectionCard}>
-      <div className={styles.cardHeader}>
-        <h3 className={styles.cardTitle}>
-          <CreditCard size={18} className="text-success" />
-          <span>Receive Payment Desk</span>
-        </h3>
-      </div>
+  const renderCollectPaymentConsole = (showOnlyRecent10 = true) => {
+    const sortedPayments = [...payments].sort((a, b) => {
+      return new Date(b.paymentDateAD || 0).getTime() - new Date(a.paymentDateAD || 0).getTime();
+    });
+    const recentPayments = showOnlyRecent10 ? sortedPayments.slice(0, 10) : sortedPayments;
 
-      <form onSubmit={handleCollectionSubmit} className={styles.form}>
-        {formMsg.text && (
-          <div className={`${styles.feedbackMessage} ${formMsg.type === 'success' ? styles.successMsg : styles.errorMsg}`}>
-            {formMsg.text}
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
+        {/* Form counter card */}
+        <div className={styles.sectionCard}>
+          <div className={styles.cardHeader}>
+            <h3 className={styles.cardTitle}>
+              <CreditCard size={18} className="text-success" />
+              <span>Collect Fee Counter Console</span>
+            </h3>
           </div>
-        )}
 
-        <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="pay-alloc">Select Student Account Bill</label>
-          <select
-            id="pay-alloc"
-            value={selectedAllocationId}
-            onChange={(e) => setSelectedAllocationId(e.target.value)}
-            required
-          >
-            <option value="">-- Choose Allocation --</option>
-            {feeAllocations.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.student.user.name} ({a.feeStructure.title}) - Due: NPR {a.dueAmount}
-              </option>
-            ))}
-          </select>
+          <form onSubmit={handleCollectionSubmit} className={styles.form}>
+            {formMsg.text && (
+              <div className={`${styles.feedbackMessage} ${formMsg.type === 'success' ? styles.successMsg : styles.errorMsg}`}>
+                {formMsg.text}
+              </div>
+            )}
+
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="pay-alloc">Select Student Account Bill</label>
+              <select
+                id="pay-alloc"
+                value={selectedAllocationId}
+                onChange={(e) => {
+                  setSelectedAllocationId(e.target.value);
+                  const alloc = feeAllocations.find(a => a.id === e.target.value);
+                  if (alloc) {
+                    setPaymentAmount(String(alloc.dueAmount));
+                  } else {
+                    setPaymentAmount('');
+                  }
+                }}
+                required
+              >
+                <option value="">-- Choose Allocation --</option>
+                {feeAllocations.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.student.user.name} ({a.feeStructure.title}) - Due: NPR {a.dueAmount}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="pay-amount">Amount Collected (NPR)</label>
+              <input
+                id="pay-amount"
+                type="number"
+                placeholder="Enter NPR collection value"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="pay-method">Payment Method</label>
+              <select
+                id="pay-method"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+              >
+                <option value="ONLINE">ONLINE / E-Banking</option>
+                <option value="CASH">CASH Counter Payment</option>
+                <option value="ESEWA">eSewa Mobile Wallet</option>
+                <option value="KHALTI">Khalti Mobile Wallet</option>
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="pay-tx">Transaction / Reference ID (Optional)</label>
+              <input
+                id="pay-tx"
+                type="text"
+                placeholder="E.g. TXN-1293024823"
+                value={transactionId}
+                onChange={(e) => setTransactionId(e.target.value)}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label} htmlFor="pay-date">Payment Date (BS Format)</label>
+              <input
+                id="pay-date"
+                type="text"
+                value={paymentDateBS}
+                onChange={(e) => setPaymentDateBS(e.target.value)}
+                required
+              />
+            </div>
+
+            <button type="submit" className="btn-primary" style={{ display: 'flex', gap: '8px', alignSelf: 'flex-start', alignItems: 'center' }}>
+              <CheckCircle size={16} />
+              <span>Process Fee Collection</span>
+            </button>
+          </form>
         </div>
 
-        <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="pay-amount">Amount Collected (NPR)</label>
-          <input
-            id="pay-amount"
-            type="number"
-            placeholder="Enter NPR collection value"
-            value={paymentAmount}
-            onChange={(e) => setPaymentAmount(e.target.value)}
-            required
-          />
+        {/* Recent 10 bills / receipts list */}
+        <div className={styles.sectionCard}>
+          <div className={styles.cardHeader} style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '16px' }}>
+            <h3 className={styles.cardTitle}>
+              <TrendingUp size={18} className="text-success" />
+              <span>Recent 10 Bills / Receipts Created</span>
+            </h3>
+          </div>
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Receipt No</th>
+                  <th>Student Name</th>
+                  <th>Fee Title</th>
+                  <th>Amount Paid</th>
+                  <th>Method</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentPayments.length > 0 ? (
+                  recentPayments.map((p: any) => (
+                    <tr key={p.id}>
+                      <td><strong>{p.receiptNumber}</strong></td>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>{p.feeAllocation?.student?.user?.name || 'Student'}</div>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Class: {p.feeAllocation?.student?.class?.name}</span>
+                      </td>
+                      <td>{p.feeAllocation?.feeStructure?.title || 'Tuition Fee'}</td>
+                      <td className="text-success" style={{ fontWeight: 700 }}>NPR {p.amount}</td>
+                      <td>
+                        <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>{p.paymentMethod}</span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: 'center', color: '#9ca3af', padding: '20px' }}>
+                      No recent billing transactions found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderBillingRegistry = () => {
+    // 1. Filter allocations based on searchQuery, filterClass, filterPaymentStatus
+    const filteredAllocations = feeAllocations.filter((a) => {
+      const q = searchQuery.toLowerCase();
+      const matchesSearch = 
+        a.student.user.name.toLowerCase().includes(q) ||
+        a.student.rollNumber.toLowerCase().includes(q) ||
+        a.student.class.name.toLowerCase().includes(q) ||
+        (a.student.class.section && a.student.class.section.toLowerCase().includes(q)) ||
+        a.feeStructure.title.toLowerCase().includes(q);
+
+      const matchesClass = filterClass === 'ALL' || a.student.class.name === filterClass;
+      const matchesStatus = filterPaymentStatus === 'ALL' || a.status === filterPaymentStatus;
+
+      return matchesSearch && matchesClass && matchesStatus;
+    });
+
+    // 2. Filter payments based on searchQuery, filterClass
+    const filteredPayments = payments.filter((p) => {
+      const q = searchQuery.toLowerCase();
+      const studentName = p.feeAllocation?.student?.user?.name || '';
+      const rollNumber = p.feeAllocation?.student?.rollNumber || '';
+      const className = p.feeAllocation?.student?.class?.name || '';
+      const feeTitle = p.feeAllocation?.feeStructure?.title || '';
+      const receiptId = p.receiptNumber || '';
+
+      const matchesSearch = 
+        studentName.toLowerCase().includes(q) ||
+        rollNumber.toLowerCase().includes(q) ||
+        className.toLowerCase().includes(q) ||
+        feeTitle.toLowerCase().includes(q) ||
+        receiptId.toLowerCase().includes(q);
+
+      const matchesClass = filterClass === 'ALL' || className === filterClass;
+
+      return matchesSearch && matchesClass;
+    });
+
+    // Extract unique classes for filter options
+    const uniqueClasses = Array.from(new Set(feeAllocations.map(a => a.student.class.name)));
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
+        
+        {/* Master Filters Toolbar */}
+        <div className={styles.sectionCard} style={{ padding: '20px' }}>
+          <h4 style={{ margin: '0 0 16px 0', fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FileText size={18} className="text-primary" />
+            <span>Search & Billing Filters</span>
+          </h4>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+            {/* Search Input */}
+            <div style={{ flex: '2 1 300px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Search Student, Roll, Class or Title</label>
+              <input
+                type="text"
+                placeholder="Type name, roll number, class or department..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  padding: '10px 14px',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px',
+                  backgroundColor: 'var(--bg-main)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.85rem',
+                  outline: 'none',
+                }}
+              />
+            </div>
+            {/* Class Filter */}
+            <div style={{ flex: '1 1 180px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Filter by Class Program</label>
+              <select
+                value={filterClass}
+                onChange={(e) => setFilterClass(e.target.value)}
+                style={{
+                  padding: '10px 14px',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px',
+                  backgroundColor: 'var(--bg-main)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.85rem',
+                  outline: 'none',
+                }}
+              >
+                <option value="ALL">All Classes</option>
+                {uniqueClasses.map(cls => (
+                  <option key={cls} value={cls}>{cls}</option>
+                ))}
+              </select>
+            </div>
+            {/* Status Filter */}
+            <div style={{ flex: '1 1 180px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Payment Status</label>
+              <select
+                value={filterPaymentStatus}
+                onChange={(e) => setFilterPaymentStatus(e.target.value)}
+                style={{
+                  padding: '10px 14px',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '8px',
+                  backgroundColor: 'var(--bg-main)',
+                  color: 'var(--text-main)',
+                  fontSize: '0.85rem',
+                  outline: 'none',
+                }}
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="PAID">Fully Settled</option>
+                <option value="PARTIAL">Partially Paid</option>
+                <option value="UNPAID">Outstanding / Unpaid</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="pay-method">Payment Method</label>
-          <select
-            id="pay-method"
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-          >
-            <option value="ONLINE">ONLINE / E-Banking</option>
-            <option value="CASH">CASH Counter Payment</option>
-            <option value="ESEWA">eSewa Mobile Wallet</option>
-            <option value="KHALTI">Khalti Mobile Wallet</option>
-          </select>
-        </div>
+        {/* Dynamic Split Layout */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '24px' }}>
+          
+          {/* Section A: Payment Receipts Logs */}
+          <div className={styles.sectionCard} style={{ display: 'flex', flexDirection: 'column', height: 'fit-content' }}>
+            <div className={styles.cardHeader} style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '16px' }}>
+              <h3 className={styles.cardTitle}>
+                <TrendingUp size={18} className="text-success" />
+                <span>All Receipts & Payment Log</span>
+              </h3>
+            </div>
+            <div className={styles.tableWrapper} style={{ maxHeight: '420px', overflowY: 'auto' }}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Receipt No</th>
+                    <th>Student Name</th>
+                    <th>Fee Bill Title</th>
+                    <th>Amount Paid</th>
+                    <th>Date / Method</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPayments.length > 0 ? (
+                    filteredPayments.map((p: any) => (
+                      <tr key={p.id}>
+                        <td><strong>{p.receiptNumber}</strong></td>
+                        <td>
+                          <div style={{ fontWeight: 600 }}>{p.feeAllocation?.student?.user?.name || 'Student'}</div>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Class: {p.feeAllocation?.student?.class?.name}</span>
+                        </td>
+                        <td>{p.feeAllocation?.feeStructure?.title || 'Tuition Fee'}</td>
+                        <td className="text-success" style={{ fontWeight: 700 }}>NPR {p.amount}</td>
+                        <td>
+                          <div>{p.paymentDateBS}</div>
+                          <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>{p.paymentMethod}</span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: 'center', color: '#9ca3af', padding: '24px' }}>
+                        No payment receipt logs matched filters.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-        <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="pay-tx">Transaction / Reference ID (Optional)</label>
-          <input
-            id="pay-tx"
-            type="text"
-            placeholder="E.g. TXN-1293024823"
-            value={transactionId}
-            onChange={(e) => setTransactionId(e.target.value)}
-          />
+          {/* Section B: Structured Student Dues */}
+          <div className={styles.sectionCard} style={{ display: 'flex', flexDirection: 'column', height: 'fit-content' }}>
+            <div className={styles.cardHeader} style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '16px' }}>
+              <h3 className={styles.cardTitle}>
+                <Users size={18} className="text-primary" />
+                <span>Student Fee Ledgers & Dues</span>
+              </h3>
+            </div>
+            <div className={styles.tableWrapper} style={{ maxHeight: '420px', overflowY: 'auto' }}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Roll / Class</th>
+                    <th>Total / Due</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAllocations.length > 0 ? (
+                    filteredAllocations.map((a) => (
+                      <tr key={a.id}>
+                        <td><strong>{a.student.user.name}</strong></td>
+                        <td>
+                          <div>Roll {a.student.rollNumber}</div>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{a.student.class.name}</span>
+                        </td>
+                        <td>
+                          <div style={{ fontSize: '0.85rem' }}>Total: NPR {a.feeStructure.amount}</div>
+                          <span className="text-danger" style={{ fontWeight: 600, fontSize: '0.8rem' }}>Due: NPR {a.dueAmount}</span>
+                        </td>
+                        <td>
+                          <span className={`badge ${a.status === 'PAID' ? 'badge-success' : a.status === 'PARTIAL' ? 'badge-warning' : 'badge-danger'}`} style={{ fontSize: '0.75rem' }}>
+                            {a.status}
+                          </span>
+                        </td>
+                        <td>
+                          {a.status !== 'PAID' ? (
+                            <button
+                              onClick={() => {
+                                setSelectedAllocationId(a.id);
+                                setPaymentAmount(String(a.dueAmount));
+                                setShowCollectionModal(true);
+                              }}
+                              style={{
+                                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                                color: '#2563eb',
+                                border: '1px solid rgba(37, 99, 235, 0.2)',
+                                borderRadius: '6px',
+                                padding: '4px 8px',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                              }}
+                              onMouseOver={(e) => {
+                                e.currentTarget.style.backgroundColor = '#2563eb';
+                                e.currentTarget.style.color = '#ffffff';
+                              }}
+                              onMouseOut={(e) => {
+                                e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.1)';
+                                e.currentTarget.style.color = '#2563eb';
+                              }}
+                            >
+                              Collect
+                            </button>
+                          ) : (
+                            <span style={{ color: 'var(--success)', fontWeight: 600, fontSize: '0.75rem' }}>Settled</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: 'center', color: '#9ca3af', padding: '24px' }}>
+                        No class records matched filters.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="pay-date">Payment Date (BS Format)</label>
-          <input
-            id="pay-date"
-            type="text"
-            value={paymentDateBS}
-            onChange={(e) => setPaymentDateBS(e.target.value)}
-            required
-          />
-        </div>
-
-        <button type="submit" className="btn-primary" style={{ display: 'flex', gap: '8px', alignSelf: 'flex-start', alignItems: 'center' }}>
-          <CheckCircle size={16} />
-          <span>Process Fee Collection</span>
-        </button>
-      </form>
-    </div>
-  );
+      </div>
+    );
+  };
 
   const renderStructuresCard = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -1245,14 +1685,855 @@ export default function AccountsDashboard({ subPage }: { subPage?: string }) {
     );
   };
 
+  const renderCollectionModal = () => (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
+      backdropFilter: 'blur(4px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 999,
+      padding: '20px'
+    }}>
+      <div className={styles.sectionCard} style={{ maxWidth: '550px', width: '100%', position: 'relative', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}>
+        <button
+          onClick={() => setShowCollectionModal(false)}
+          style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            background: 'none',
+            border: 'none',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            color: 'var(--text-muted)',
+            lineHeight: 1
+          }}
+        >
+          &times;
+        </button>
+        <div className={styles.cardHeader} style={{ marginBottom: '16px' }}>
+          <h3 className={styles.cardTitle}>
+            <CreditCard size={18} className="text-success" />
+            <span>Collect Student Fee Counter Console</span>
+          </h3>
+        </div>
+        
+        <form onSubmit={async (e) => {
+          await handleCollectionSubmit(e);
+          setShowCollectionModal(false);
+        }} className={styles.form}>
+          {formMsg.text && (
+            <div className={`${styles.feedbackMessage} ${formMsg.type === 'success' ? styles.successMsg : styles.errorMsg}`}>
+              {formMsg.text}
+            </div>
+          )}
+
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="modal-pay-alloc">Select Student Account Bill</label>
+            <select
+              id="modal-pay-alloc"
+              value={selectedAllocationId}
+              onChange={(e) => {
+                setSelectedAllocationId(e.target.value);
+                const alloc = feeAllocations.find(a => a.id === e.target.value);
+                if (alloc) {
+                  setPaymentAmount(String(alloc.dueAmount));
+                } else {
+                  setPaymentAmount('');
+                }
+              }}
+              required
+            >
+              <option value="">-- Choose Allocation --</option>
+              {feeAllocations.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.student.user.name} ({a.feeStructure.title}) - Due: NPR {a.dueAmount}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="modal-pay-amount">Amount Collected (NPR)</label>
+            <input
+              id="modal-pay-amount"
+              type="number"
+              placeholder="Enter NPR collection value"
+              value={paymentAmount}
+              onChange={(e) => setPaymentAmount(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="modal-pay-method">Payment Method</label>
+            <select
+              id="modal-pay-method"
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            >
+              <option value="ONLINE">ONLINE / E-Banking</option>
+              <option value="CASH">CASH Counter Payment</option>
+              <option value="ESEWA">eSewa Mobile Wallet</option>
+              <option value="KHALTI">Khalti Mobile Wallet</option>
+            </select>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="modal-pay-tx">Transaction / Reference ID (Optional)</label>
+            <input
+              id="modal-pay-tx"
+              type="text"
+              placeholder="E.g. TXN-1293024823"
+              value={transactionId}
+              onChange={(e) => setTransactionId(e.target.value)}
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label} htmlFor="modal-pay-date">Payment Date (BS Format)</label>
+            <input
+              id="modal-pay-date"
+              type="text"
+              value={paymentDateBS}
+              onChange={(e) => setPaymentDateBS(e.target.value)}
+              required
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
+            <button type="button" className="btn-secondary" onClick={() => setShowCollectionModal(false)} style={{ padding: '8px 16px', borderRadius: '6px' }}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary" style={{ padding: '8px 16px', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <CheckCircle size={16} />
+              <span>Process Payment</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+  const renderFinancialAuditCenter = () => {
+    const filteredAuditTx = auditTransactions.filter((t) => {
+      const q = auditSearch.toLowerCase();
+      const matchesSearch =
+        !auditSearch ||
+        (t.studentName || '').toLowerCase().includes(q) ||
+        (t.studentId || '').toLowerCase().includes(q) ||
+        (t.receiptNumber || '').toLowerCase().includes(q) ||
+        (t.id || '').toLowerCase().includes(q);
+
+      const matchesDept = auditDeptFilter === 'ALL' || t.department === auditDeptFilter;
+      const matchesMethod = auditMethodFilter === 'ALL' || t.paymentMethod === auditMethodFilter;
+      const matchesVerif = auditVerifFilter === 'ALL' || t.verificationStatus === auditVerifFilter;
+
+      return matchesSearch && matchesDept && matchesMethod && matchesVerif;
+    });
+
+    const pendingVerificationCount = auditTransactions.filter(t => t.verificationStatus === 'PENDING_VERIFICATION' || t.verificationStatus === 'UNDER_REVIEW').length;
+
+    const handleVerifyAction = async (txId: string, status: string) => {
+      try {
+        const res = await fetch('/api/financial-audit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'VERIFY_TRANSACTION',
+            transactionId: txId,
+            status,
+            remarks: auditRemarksText,
+            userRole: profile?.role || 'ACCOUNTS_HEAD'
+          })
+        });
+        if (res.ok) {
+          setShowApprovalModal(false);
+          setAuditRemarksText('');
+          loadFinancialData();
+        }
+      } catch (err) {
+        console.error('Audit verification failed:', err);
+      }
+    };
+
+    const handleExport = (type: string, dataName: string) => {
+      alert(`Exporting ${dataName} as ${type.toUpperCase()} file... Download will start automatically.`);
+    };
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+        {/* Header Title & Audit Summary */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', background: 'var(--bg-card)', padding: '20px 24px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+          <div>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
+              <ShieldCheck size={24} className="text-primary" />
+              <span>Financial Audit & Maker-Checker Verification Center</span>
+            </h2>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+              Internal Financial Control, Reconciliations, Audit Trail Logs & Risk Analysis | Auditor: <strong>{profile?.name || 'Accounts Head'}</strong>
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <span className="badge badge-warning" style={{ padding: '8px 14px', fontSize: '0.8rem', fontWeight: 700 }}>
+              {pendingVerificationCount} Pending Approvals
+            </span>
+            <button onClick={loadFinancialData} className="btn-secondary" style={{ padding: '8px 14px', borderRadius: '6px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <RefreshCw size={14} />
+              <span>Refresh Audit</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 13 Audit Sub-Tabs Bar (Clean Emoji-Free) */}
+        <div style={{ display: 'flex', gap: '6px', borderBottom: '1.5px solid var(--border-color, #e2e8f0)', paddingBottom: '8px', flexWrap: 'wrap' }}>
+          {[
+            { key: 'dashboard', label: 'Audit Dashboard' },
+            { key: 'transactions', label: 'Transaction Audit' },
+            { key: 'approvals', label: 'Approval Center' },
+            { key: 'audit-logs', label: 'Audit Trail Logs' },
+            { key: 'reports', label: 'Financial Reports' },
+            { key: 'cash-recon', label: 'Cash Reconciliation' },
+            { key: 'bank-recon', label: 'Bank Reconciliation' },
+            { key: 'scholarships', label: 'Scholarship Audit' },
+            { key: 'refunds', label: 'Refund Audit' },
+            { key: 'analytics', label: 'Financial Analytics' },
+            { key: 'compliance', label: 'Compliance & Alerts' },
+            { key: 'vault', label: 'Document Vault' },
+            { key: 'suspicious', label: 'Suspicious Activities' },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setAuditSubTab(tab.key)}
+              style={{
+                padding: '8px 14px',
+                borderRadius: '6px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                backgroundColor: auditSubTab === tab.key ? '#2563eb' : 'transparent',
+                color: auditSubTab === tab.key ? '#ffffff' : '#64748b'
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* SUB-VIEW 1: AUDIT DASHBOARD */}
+        {auditSubTab === 'dashboard' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <div className={styles.statInfo}>
+                  <span className={styles.statLabel}>Revenue Today</span>
+                  <span className={styles.statValue}>NPR {auditMetrics?.totalRevenueToday?.toLocaleString() || '48,500'}</span>
+                  <span className={styles.statDesc}>Gross daily receipts</span>
+                </div>
+                <div className={`${styles.statIcon} ${styles.successIcon}`}><TrendingUp size={20} /></div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statInfo}>
+                  <span className={styles.statLabel}>Revenue This Month</span>
+                  <span className={styles.statValue}>NPR {auditMetrics?.totalRevenueThisMonth?.toLocaleString() || '245,000'}</span>
+                  <span className={styles.statDesc}>Total monthly fees</span>
+                </div>
+                <div className={`${styles.statIcon} ${styles.primaryIcon}`}><DollarSign size={20} /></div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statInfo}>
+                  <span className={styles.statLabel}>Outstanding Fees</span>
+                  <span className={styles.statValue}>NPR {auditMetrics?.outstandingFees?.toLocaleString() || '84,500'}</span>
+                  <span className={styles.statDesc}>Pending balances</span>
+                </div>
+                <div className={`${styles.statIcon} ${styles.dangerIcon}`}><CreditCard size={20} /></div>
+              </div>
+            </div>
+
+            {/* Target vs Achievement Progress & Department Revenue */}
+            <div className={styles.mainGrid}>
+              <div className={styles.sectionCard}>
+                <h3 className={styles.cardTitle}>
+                  <BarChart3 size={18} className="text-primary" />
+                  <span>Collection Target & Achievement</span>
+                </h3>
+                <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                    <span>Target: <strong>NPR 3,000,000</strong></span>
+                    <span>Achievement: <strong>{auditMetrics?.collectionAchievement || 68}%</strong></span>
+                  </div>
+                  <div style={{ width: '100%', height: '12px', backgroundColor: '#e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+                    <div style={{ width: `${auditMetrics?.collectionAchievement || 68}%`, height: '100%', backgroundColor: '#2563eb', borderRadius: '6px' }} />
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.sectionCard}>
+                <h3 className={styles.cardTitle}>
+                  <PieChart size={18} className="text-success" />
+                  <span>Payment Method Distribution</span>
+                </h3>
+                <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Cash Counter Collection:</span>
+                    <strong>NPR {auditMetrics?.cashCollection?.toLocaleString() || '18,500'}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Online / Digital Transfer:</span>
+                    <strong>NPR {auditMetrics?.onlinePayments?.toLocaleString() || '226,500'}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SUB-VIEW 2: TRANSACTION AUDIT */}
+        {auditSubTab === 'transactions' && (
+          <div className={styles.sectionCard}>
+            <div className={styles.cardHeader} style={{ flexWrap: 'wrap', gap: '12px' }}>
+              <h3 className={styles.cardTitle}>
+                <FileText size={18} className="text-primary" />
+                <span>Comprehensive Transaction Audit Registry</span>
+              </h3>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={() => handleExport('csv', 'Transaction Audit')} className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.75rem' }}>Export CSV</button>
+                <button onClick={() => handleExport('excel', 'Transaction Audit')} className="btn-secondary" style={{ padding: '6px 12px', fontSize: '0.75rem' }}>Export Excel</button>
+              </div>
+            </div>
+
+            {/* Filters Bar */}
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', padding: '12px', background: 'var(--bg-hover)', borderRadius: '8px', marginBottom: '16px' }}>
+              <input type="text" placeholder="Search Student Name, ID, Receipt..." value={auditSearch} onChange={(e) => setAuditSearch(e.target.value)} style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', minWidth: '220px', fontSize: '0.85rem' }} />
+              <select value={auditDeptFilter} onChange={(e) => setAuditDeptFilter(e.target.value)} style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+                <option value="ALL">All Departments</option>
+                <option value="Science">Science</option>
+                <option value="Management">Management</option>
+                <option value="Humanities">Humanities</option>
+              </select>
+              <select value={auditMethodFilter} onChange={(e) => setAuditMethodFilter(e.target.value)} style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+                <option value="ALL">All Payment Methods</option>
+                <option value="CASH">CASH</option>
+                <option value="ONLINE">ONLINE / E-Banking</option>
+                <option value="BANK_TRANSFER">BANK_TRANSFER</option>
+              </select>
+              <select value={auditVerifFilter} onChange={(e) => setAuditVerifFilter(e.target.value)} style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
+                <option value="ALL">All Verification Statuses</option>
+                <option value="VERIFIED">VERIFIED</option>
+                <option value="PENDING_VERIFICATION">PENDING_VERIFICATION</option>
+                <option value="UNDER_REVIEW">UNDER_REVIEW</option>
+                <option value="REJECTED">REJECTED</option>
+              </select>
+            </div>
+
+            {/* Transactions Table */}
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Receipt ID</th>
+                    <th>Student Details</th>
+                    <th>Dept / Program</th>
+                    <th>Payment Method</th>
+                    <th>Bill Amount</th>
+                    <th>Discount</th>
+                    <th>Scholarship</th>
+                    <th>Collector</th>
+                    <th>Verification Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAuditTx.map((tx) => (
+                    <tr key={tx.id}>
+                      <td><strong>{tx.receiptNumber}</strong></td>
+                      <td>
+                        <div><strong>{tx.studentName}</strong></div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{tx.studentId}</div>
+                      </td>
+                      <td style={{ fontSize: '0.8rem' }}>{tx.program}</td>
+                      <td><span className="badge badge-primary" style={{ fontSize: '0.75rem' }}>{tx.paymentMethod}</span></td>
+                      <td><strong>NPR {tx.amount.toLocaleString()}</strong></td>
+                      <td className="text-danger" style={{ fontSize: '0.8rem' }}>{tx.discount > 0 ? `NPR ${tx.discount}` : '-'}</td>
+                      <td className="text-success" style={{ fontSize: '0.8rem' }}>{tx.scholarship > 0 ? `NPR ${tx.scholarship}` : '-'}</td>
+                      <td style={{ fontSize: '0.8rem' }}>{tx.collector}</td>
+                      <td>
+                        <span className={`badge ${tx.verificationStatus === 'VERIFIED' ? 'badge-success' : tx.verificationStatus === 'PENDING_VERIFICATION' ? 'badge-warning' : tx.verificationStatus === 'REJECTED' ? 'badge-danger' : 'badge-primary'}`} style={{ fontSize: '0.7rem' }}>
+                          {tx.verificationStatus}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => { setSelectedAuditTx(tx); setShowApprovalModal(true); }}
+                          className="btn-secondary"
+                          style={{ padding: '4px 10px', fontSize: '0.75rem', borderRadius: '4px' }}
+                        >
+                          Audit Review
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* SUB-VIEW 3: APPROVAL CENTER (MAKER-CHECKER) */}
+        {auditSubTab === 'approvals' && (
+          <div className={styles.sectionCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>
+                <CheckSquare size={18} className="text-warning" />
+                <span>Maker-Checker Approval Workspace</span>
+              </h3>
+            </div>
+            <div style={{ background: '#fef3c7', border: '1px solid #f59e0b', padding: '12px 16px', borderRadius: '8px', fontSize: '0.85rem', color: '#92400e', marginBottom: '16px' }}>
+              <strong>Maker-Checker Constraint Active:</strong> Transactions initiated by Accounts Officers require mandatory Accounts Head review and secondary audit clearance.
+            </div>
+
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Receipt #</th>
+                    <th>Student</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Initiated By (Maker)</th>
+                    <th>Date</th>
+                    <th>Audit Action (Checker)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {auditTransactions.filter(t => t.verificationStatus === 'PENDING_VERIFICATION' || t.verificationStatus === 'UNDER_REVIEW').map(tx => (
+                    <tr key={tx.id}>
+                      <td><strong>{tx.receiptNumber}</strong></td>
+                      <td>{tx.studentName} ({tx.studentId})</td>
+                      <td><strong>NPR {tx.amount.toLocaleString()}</strong></td>
+                      <td><span className="badge badge-primary">{tx.paymentMethod}</span></td>
+                      <td style={{ fontSize: '0.8rem' }}>{tx.collector}</td>
+                      <td style={{ fontSize: '0.8rem' }}>{tx.transactionDate}</td>
+                      <td style={{ display: 'flex', gap: '6px' }}>
+                        <button onClick={() => handleVerifyAction(tx.id, 'VERIFIED')} className="btn-primary" style={{ padding: '4px 10px', fontSize: '0.75rem', borderRadius: '4px', backgroundColor: '#10b981' }}>Approve</button>
+                        <button onClick={() => handleVerifyAction(tx.id, 'REJECTED')} className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem', borderRadius: '4px', color: '#ef4444' }}>Reject</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* SUB-VIEW 4: AUDIT TRAIL LOGS */}
+        {auditSubTab === 'audit-logs' && (
+          <div className={styles.sectionCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>
+                <Lock size={18} className="text-primary" />
+                <span>Immutable System Audit Trail Logs</span>
+              </h3>
+            </div>
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>User & Role</th>
+                    <th>Action Executed</th>
+                    <th>Old Value</th>
+                    <th>New Value</th>
+                    <th>Timestamp</th>
+                    <th>IP / Device</th>
+                    <th>Reason / Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {auditLogs.map((log) => (
+                    <tr key={log.id}>
+                      <td>
+                        <div><strong>{log.user}</strong></div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{log.role}</div>
+                      </td>
+                      <td><span className="badge badge-primary" style={{ fontSize: '0.7rem' }}>{log.action}</span></td>
+                      <td style={{ fontSize: '0.8rem', color: '#ef4444' }}>{log.oldValue}</td>
+                      <td style={{ fontSize: '0.8rem', color: '#10b981' }}>{log.newValue}</td>
+                      <td style={{ fontSize: '0.75rem' }}>{log.date} {log.time}</td>
+                      <td style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{log.ipAddress} ({log.os})</td>
+                      <td style={{ fontSize: '0.8rem' }}>{log.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* SUB-VIEW 5: FINANCIAL REPORTS */}
+        {auditSubTab === 'reports' && (
+          <div className={styles.sectionCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>
+                <FileSpreadsheet size={18} className="text-success" />
+                <span>Financial Audit Reports & Export Center</span>
+              </h3>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginTop: '12px' }}>
+              {['Daily Collection Report', 'Weekly Audit Statement', 'Monthly Revenue Report', 'Quarterly Financial Summary', 'Yearly Audit Ledger', 'Outstanding Fees Report', 'Refund Audit Summary', 'Scholarship Distribution Report'].map((rName) => (
+                <div key={rName} style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <strong>{rName}</strong>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <button onClick={() => handleExport('pdf', rName)} className="btn-secondary" style={{ padding: '4px 8px', fontSize: '0.75rem' }}>PDF</button>
+                    <button onClick={() => handleExport('excel', rName)} className="btn-secondary" style={{ padding: '4px 8px', fontSize: '0.75rem' }}>Excel</button>
+                    <button onClick={() => handleExport('csv', rName)} className="btn-secondary" style={{ padding: '4px 8px', fontSize: '0.75rem' }}>CSV</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SUB-VIEW 6: CASH RECONCILIATION */}
+        {auditSubTab === 'cash-recon' && (
+          <div className={styles.sectionCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>
+                <DollarSign size={18} className="text-success" />
+                <span>Daily Cash Counter Reconciliation</span>
+              </h3>
+            </div>
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Cashier / Collector</th>
+                    <th>Collected (NPR)</th>
+                    <th>Deposited (NPR)</th>
+                    <th>Expected (NPR)</th>
+                    <th>Actual (NPR)</th>
+                    <th>Difference</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cashRecons.map((cr) => (
+                    <tr key={cr.id}>
+                      <td><strong>{cr.date}</strong></td>
+                      <td>{cr.collector}</td>
+                      <td>NPR {(cr.cashCollected || 0).toLocaleString()}</td>
+                      <td>NPR {(cr.cashDeposited || 0).toLocaleString()}</td>
+                      <td>NPR {(cr.expectedCash || 0).toLocaleString()}</td>
+                      <td>NPR {(cr.actualCash || 0).toLocaleString()}</td>
+                      <td className={cr.difference === 0 ? 'text-success' : 'text-danger'} style={{ fontWeight: 700 }}>
+                        {cr.difference === 0 ? 'NPR 0' : `NPR ${cr.difference}`}
+                      </td>
+                      <td>
+                        <span className={`badge ${cr.status === 'BALANCED' ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: '0.7rem' }}>
+                          {cr.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* SUB-VIEW 7: BANK RECONCILIATION */}
+        {auditSubTab === 'bank-recon' && (
+          <div className={styles.sectionCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>
+                <Layers size={18} className="text-primary" />
+                <span>Bank Statement Reconciliation Matrix</span>
+              </h3>
+            </div>
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Bank Account Name</th>
+                    <th>Statement Date</th>
+                    <th>Bank Amount (NPR)</th>
+                    <th>System Ledger Amount (NPR)</th>
+                    <th>Unmatched Items</th>
+                    <th>Reconciliation Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bankRecons.map((br) => (
+                    <tr key={br.id}>
+                      <td><strong>{br.bankName}</strong></td>
+                      <td>{br.statementDate}</td>
+                      <td>NPR {(br.bankAmount || 0).toLocaleString()}</td>
+                      <td>NPR {(br.systemAmount || 0).toLocaleString()}</td>
+                      <td>{br.unmatchedCount || 0} items</td>
+                      <td>
+                        <span className={`badge ${br.status === 'MATCHED' ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: '0.7rem' }}>
+                          {br.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* SUB-VIEW 8: SCHOLARSHIP AUDIT */}
+        {auditSubTab === 'scholarships' && (
+          <div className={styles.sectionCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>
+                <FileCheck size={18} className="text-primary" />
+                <span>Scholarship & Grant Allocation Audit</span>
+              </h3>
+            </div>
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Scholarship Type</th>
+                    <th>Amount (NPR)</th>
+                    <th>Approver</th>
+                    <th>Audit Reason</th>
+                    <th>Date Granted</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {scholarshipAudits.map((sc) => (
+                    <tr key={sc.id}>
+                      <td><strong>{sc.studentName}</strong> ({sc.studentId})</td>
+                      <td><span className="badge badge-primary">{sc.scholarshipType}</span></td>
+                      <td><strong>NPR {(sc.amount || 0).toLocaleString()}</strong></td>
+                      <td>{sc.approver}</td>
+                      <td style={{ fontSize: '0.8rem' }}>{sc.reason}</td>
+                      <td style={{ fontSize: '0.8rem' }}>{sc.date}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* SUB-VIEW 9: REFUND AUDIT */}
+        {auditSubTab === 'refunds' && (
+          <div className={styles.sectionCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>
+                <RefreshCw size={18} className="text-danger" />
+                <span>Refund Request Audit Registry</span>
+              </h3>
+            </div>
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Refund Amount (NPR)</th>
+                    <th>Reason</th>
+                    <th>Approval Status</th>
+                    <th>Approver</th>
+                    <th>Refund Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {refundAudits.map((rf) => (
+                    <tr key={rf.id}>
+                      <td><strong>{rf.studentName}</strong> ({rf.studentId})</td>
+                      <td><strong>NPR {(rf.refundAmount || 0).toLocaleString()}</strong></td>
+                      <td style={{ fontSize: '0.8rem' }}>{rf.reason}</td>
+                      <td>
+                        <span className={`badge ${rf.approvalStatus === 'APPROVED' ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.7rem' }}>
+                          {rf.approvalStatus}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '0.8rem' }}>{rf.approver || 'Pending'}</td>
+                      <td style={{ fontSize: '0.8rem' }}>{rf.refundDate}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* SUB-VIEW 10: FINANCIAL ANALYTICS */}
+        {auditSubTab === 'analytics' && (
+          <div className={styles.sectionCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>
+                <BarChart3 size={18} className="text-primary" />
+                <span>Enterprise Financial Analytics</span>
+              </h3>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginTop: '12px' }}>
+              <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '20px' }}>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: '0.95rem' }}>Revenue Growth Rate</h4>
+                <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#10b981' }}>+14.2% YoY</div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Compared to previous academic period</p>
+              </div>
+              <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '20px' }}>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: '0.95rem' }}>Fee Recovery Rate</h4>
+                <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#2563eb' }}>91.8%</div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Outstanding fee recovery velocity</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SUB-VIEW 11: COMPLIANCE DASHBOARD */}
+        {auditSubTab === 'compliance' && (
+          <div className={styles.sectionCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>
+                <AlertOctagon size={18} className="text-warning" />
+                <span>Institutional Financial Compliance Monitor</span>
+              </h3>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginTop: '12px' }}>
+              <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '16px', background: '#fffbe6' }}>
+                <span style={{ fontSize: '0.8rem', color: '#d97706', fontWeight: 600 }}>Unverified Transactions</span>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#b45309', marginTop: '4px' }}>
+                  {complianceData?.unverifiedTransactions || 1}
+                </div>
+              </div>
+              <div style={{ border: '1px solid var(--border-color)', borderRadius: '8px', padding: '16px', background: '#fef2f2' }}>
+                <span style={{ fontSize: '0.8rem', color: '#dc2626', fontWeight: 600 }}>Suspicious Flags</span>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#991b1b', marginTop: '4px' }}>
+                  {complianceData?.suspiciousActivities || 3}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SUB-VIEW 12: DOCUMENT VAULT */}
+        {auditSubTab === 'vault' && (
+          <div className={styles.sectionCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>
+                <Lock size={18} className="text-primary" />
+                <span>Financial Document Vault & Invoices Store</span>
+              </h3>
+            </div>
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Document Title</th>
+                    <th>Category</th>
+                    <th>Uploaded By</th>
+                    <th>Upload Date</th>
+                    <th>File Size</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {vaultDocs.map((vd) => (
+                    <tr key={vd.id}>
+                      <td><strong>{vd.title}</strong></td>
+                      <td><span className="badge badge-primary">{vd.category}</span></td>
+                      <td style={{ fontSize: '0.8rem' }}>{vd.uploadedBy}</td>
+                      <td style={{ fontSize: '0.8rem' }}>{vd.uploadDate}</td>
+                      <td style={{ fontSize: '0.8rem' }}>{vd.fileSize}</td>
+                      <td><button onClick={() => alert(`Accessing document vault file: ${vd.title}`)} className="btn-secondary" style={{ padding: '4px 10px', fontSize: '0.75rem' }}>View Proof</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* SUB-VIEW 13: SUSPICIOUS ACTIVITY MONITOR */}
+        {auditSubTab === 'suspicious' && (
+          <div className={styles.sectionCard}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.cardTitle}>
+                <AlertTriangle size={18} className="text-danger" />
+                <span>Automated Exception & Suspicious Activity Monitor</span>
+              </h3>
+            </div>
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Anomaly Type</th>
+                    <th>Description Details</th>
+                    <th>Student Involved</th>
+                    <th>Flagged Date</th>
+                    <th>Risk Level</th>
+                    <th>Action Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {suspiciousList.map((sa) => (
+                    <tr key={sa.id}>
+                      <td><strong>{sa.type}</strong></td>
+                      <td style={{ fontSize: '0.85rem' }}>{sa.description}</td>
+                      <td>{sa.studentName}</td>
+                      <td style={{ fontSize: '0.8rem' }}>{sa.date}</td>
+                      <td>
+                        <span className={`badge ${sa.riskLevel === 'CRITICAL' ? 'badge-danger' : sa.riskLevel === 'HIGH' ? 'badge-danger' : sa.riskLevel === 'MEDIUM' ? 'badge-warning' : 'badge-primary'}`} style={{ fontSize: '0.7rem', fontWeight: 700 }}>
+                          {sa.riskLevel} RISK
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '0.8rem' }}>{sa.actionTaken}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* APPROVAL MODAL */}
+        {showApprovalModal && selectedAuditTx && (
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999 }}>
+            <div style={{ background: 'var(--bg-card)', padding: '24px', borderRadius: '12px', maxWidth: '500px', width: '100%', border: '1px solid var(--border-color)' }}>
+              <h3>Transaction Audit Verification</h3>
+              <p>Receipt Number: <strong>{selectedAuditTx.receiptNumber}</strong> | Student: <strong>{selectedAuditTx.studentName}</strong></p>
+              <p>Amount: <strong>NPR {selectedAuditTx.amount.toLocaleString()}</strong> ({selectedAuditTx.paymentMethod})</p>
+              <div style={{ marginTop: '12px' }}>
+                <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Audit Remarks / Clarification</label>
+                <textarea value={auditRemarksText} onChange={(e) => setAuditRemarksText(e.target.value)} placeholder="Enter auditor remarks..." style={{ width: '100%', height: '80px', marginTop: '6px', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '16px' }}>
+                <button onClick={() => setShowApprovalModal(false)} className="btn-secondary">Cancel</button>
+                <button onClick={() => handleVerifyAction(selectedAuditTx.id, 'REJECTED')} className="btn-secondary" style={{ color: '#ef4444' }}>Reject</button>
+                <button onClick={() => handleVerifyAction(selectedAuditTx.id, 'VERIFIED')} className="btn-primary">Approve Transaction</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderSubPageContent = () => {
     switch (subPage?.toLowerCase()) {
       case 'structures':
         return renderStructuresCard();
       case 'payments':
-        return renderPaymentDeskCard();
+        return renderBillingRegistry();
       case 'salaries':
         return renderSalariesCard();
+      case 'audit':
+        return renderFinancialAuditCenter();
       default:
         return (
           <div className={styles.sectionCard}>
@@ -1264,16 +2545,17 @@ export default function AccountsDashboard({ subPage }: { subPage?: string }) {
 
   return (
     <div className={styles.container + " fade-in"}>
-      {!subPage ? (
-        <>
-          {/* Header */}
-          <div className={styles.welcomeSection}>
-            <div className={styles.welcomeText}>
-              <h2>Campus Cashier & Billing</h2>
-              <p>Logged in as: <strong>{profile.name}</strong> ({profile.role.replace('_', ' ')})</p>
-            </div>
-          </div>
+      {/* Welcome Header */}
+      <div className={styles.welcomeSection}>
+        <div className={styles.welcomeText}>
+          <h2>Campus Cashier & Billing</h2>
+          <p>Logged in as: <strong>{profile.name}</strong> ({profile.role.replace('_', ' ')})</p>
+        </div>
+      </div>
 
+      {/* Render selected tab panel */}
+      {activeTab === 'dashboard' && (
+        <>
           {/* Stats Cards */}
           <div className={styles.statsGrid}>
             <div className={styles.statCard}>
@@ -1310,23 +2592,26 @@ export default function AccountsDashboard({ subPage }: { subPage?: string }) {
             </div>
           </div>
 
-          <div className={styles.mainGrid}>
-            {/* Left Side: Student Fee Ledger */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {renderAllocationsCard()}
-            </div>
-
-            {/* Right Side: Fee Collector Console */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {renderPaymentDeskCard()}
-            </div>
+          {/* Stretched allocations list for a roomier, gorgeous overview */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
+            {renderAllocationsCard()}
           </div>
         </>
-      ) : (
-        <div style={{ marginTop: '24px' }}>
-          {renderSubPageContent()}
+      )}
+
+      {activeTab === 'collect' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
+          {renderCollectPaymentConsole(true)}
         </div>
       )}
+
+      {activeTab === 'payments' && renderBillingRegistry()}
+      {activeTab === 'structures' && renderStructuresCard()}
+      {activeTab === 'salaries' && renderSalariesCard()}
+      {activeTab === 'audit' && renderFinancialAuditCenter()}
+      {activeTab === 'calendar' && <AcademicCalendarManager userRole={profile.role || 'Accounts'} />}
+
+      {showCollectionModal && renderCollectionModal()}
     </div>
   );
 }

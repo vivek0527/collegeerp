@@ -8,11 +8,11 @@ import { useTheme } from './ThemeContext';
 import { useDate } from './DateContext';
 import { useSidebar } from './SidebarContext';
 import {
-  Sun, Moon, CalendarDays, ToggleLeft, ToggleRight,
+  Sun, Moon, CalendarDays, ToggleLeft, ToggleRight, Clock,
   Menu, ChevronDown, GraduationCap, ClipboardList, BookOpen,
   Users, FileText, Bell, CreditCard, AlertCircle, BarChart2,
-  CalendarCheck, UserCheck, MessageSquare, Award, LayoutDashboard,
-  DollarSign, Settings, Activity, Library, LogOut,
+  CalendarCheck, UserCheck, UserPlus, MessageSquare, Award, LayoutDashboard,
+  DollarSign, Settings, Activity, Library, LogOut, PhoneCall, Calendar
 } from 'lucide-react';
 import { adToBs } from '@/lib/dateConverter';
 
@@ -21,89 +21,123 @@ const ROLE_MENU: Record<string, { label: string; path: string; icon: React.Eleme
   STUDENT: [
     { label: 'Dashboard',       path: '/portal/student',             icon: LayoutDashboard },
     { label: 'Attendance',      path: '/portal/student/attendance',  icon: UserCheck },
-    { label: 'Exams & Routine', path: '/portal/student/exams',       icon: CalendarCheck },
+    { label: 'Exam Results',    path: '/portal/student/results',     icon: GraduationCap },
+    { label: 'Exam Seats',      path: '/portal/student/seats',       icon: Calendar },
+    { label: 'Academic Calendar',path:'/portal/student/calendar',    icon: CalendarCheck },
     { label: 'Study Materials', path: '/portal/student/materials',   icon: BookOpen },
-    { label: 'Fee Payments',    path: '/portal/student/fees',        icon: CreditCard },
+    { label: 'Fee Ledger',      path: '/portal/student/fees',        icon: CreditCard },
+    { label: 'Payment Receipts',path: '/portal/student/receipts',    icon: DollarSign },
     { label: 'Notice Board',    path: '/portal/student/notices',     icon: Bell },
     { label: 'My Complaints',   path: '/portal/student/complaints',  icon: AlertCircle },
   ],
   PARENT: [
     { label: 'Student Info',      path: '/portal/parent',             icon: LayoutDashboard },
     { label: 'Attendance Monitor',path: '/portal/parent/attendance',  icon: UserCheck },
-    { label: 'Exam Schedules',    path: '/portal/parent/exams',       icon: CalendarCheck },
+    { label: 'Academic Results',  path: '/portal/parent/results',     icon: GraduationCap },
+    { label: 'Seat Assignment',   path: '/portal/parent/seats',       icon: Calendar },
+    { label: 'Academic Calendar', path: '/portal/parent/calendar',    icon: CalendarCheck },
     { label: 'Fee Statements',    path: '/portal/parent/fees',        icon: CreditCard },
     { label: 'Notices',           path: '/portal/parent/notices',     icon: Bell },
   ],
   TEACHER: [
-    { label: 'My Classes',      path: '/portal/teacher/classes',   icon: LayoutDashboard },
-    { label: 'Upload Materials',path: '/portal/teacher/uploads',   icon: BookOpen },
-    { label: 'Salary Slips',    path: '/portal/teacher/salary',   icon: DollarSign },
-    { label: 'Notices',         path: '/portal/teacher/notices',  icon: Bell },
-    { label: 'My Profile',      path: '/portal/teacher',          icon: Users },
+    { label: 'Overview',        path: '/portal/teacher',           icon: LayoutDashboard },
+    { label: 'My Classes',      path: '/portal/teacher/classes',   icon: Users },
+    { label: 'Attendance Sheet',path: '/portal/teacher/attendance',icon: UserCheck },
+    { label: 'Enter Marks',     path: '/portal/teacher/marks',     icon: FileText },
+    { label: 'Study Materials', path: '/portal/teacher/uploads',   icon: BookOpen },
+    { label: 'Academic Calendar',path:'/portal/teacher/calendar',  icon: CalendarCheck },
+    { label: 'Salary Slips',    path: '/portal/teacher/salary',    icon: DollarSign },
+    { label: 'Notices',         path: '/portal/teacher/notices',   icon: Bell },
   ],
   PRINCIPAL: [
-    { label: 'Overview',              path: '/portal/principal',             icon: LayoutDashboard },
-    { label: 'Academic Audit',        path: '/portal/principal/academics',   icon: GraduationCap },
-    { label: 'Attendance Monitor',    path: '/portal/principal/attendance',  icon: UserCheck },
-    { label: 'Complaints Management', path: '/portal/principal/complaints',  icon: AlertCircle },
-    { label: 'Notices',               path: '/portal/principal/notices',     icon: Bell },
+    { label: 'Overview',                path: '/portal/principal',                       icon: LayoutDashboard },
+    { label: 'Admissions Approval',     path: '/portal/principal/admissions',            icon: UserCheck },
+    { label: 'Admission Portal & Years',path: '/portal/principal/admission-control',     icon: Settings },
+    { label: 'Auto Section Allocator',  path: '/portal/principal/roll-allocation',       icon: UserPlus },
+    { label: 'Late Joiners Queue',      path: '/portal/principal/late-joiners',          icon: Users },
+    { label: 'Staff Management',        path: '/portal/principal/staff',                 icon: Users },
+    { label: 'Payroll Overview',        path: '/portal/principal/finance',               icon: DollarSign },
+    { label: 'Scholarship Schemes',     path: '/portal/principal/schemes',               icon: CreditCard },
+    { label: 'Academic Audit',          path: '/portal/principal/academics',             icon: GraduationCap },
+    { label: 'Attendance Monitor',      path: '/portal/principal/attendance',            icon: UserCheck },
+    { label: 'Academic Table & Holidays',path: '/portal/principal/academic-calendar',     icon: CalendarCheck },
+    { label: 'Complaints Management',   path: '/portal/principal/complaints',            icon: AlertCircle },
+    { label: 'Notices',                 path: '/portal/principal/notices',               icon: Bell },
   ],
   VICE_PRINCIPAL: [
-    { label: 'Overview',              path: '/portal/vp',             icon: LayoutDashboard },
-    { label: 'Academic Audit',        path: '/portal/vp/academics',   icon: GraduationCap },
-    { label: 'Attendance Monitor',    path: '/portal/vp/attendance',  icon: UserCheck },
-    { label: 'Complaints Management', path: '/portal/vp/complaints',  icon: AlertCircle },
-    { label: 'Notices',               path: '/portal/vp/notices',     icon: Bell },
+    { label: 'Overview',                path: '/portal/vp',                              icon: LayoutDashboard },
+    { label: 'Admissions Approval',     path: '/portal/vp/admissions',                   icon: UserCheck },
+    { label: 'Admission Portal & Years',path: '/portal/vp/admission-control',            icon: Settings },
+    { label: 'Auto Section Allocator',  path: '/portal/vp/roll-allocation',              icon: UserPlus },
+    { label: 'Late Joiners Queue',      path: '/portal/vp/late-joiners',                 icon: Users },
+    { label: 'Staff Management',        path: '/portal/vp/staff',                        icon: Users },
+    { label: 'Payroll Overview',        path: '/portal/vp/finance',                      icon: DollarSign },
+    { label: 'Scholarship Schemes',     path: '/portal/vp/schemes',                      icon: CreditCard },
+    { label: 'Academic Audit',          path: '/portal/vp/academics',                    icon: GraduationCap },
+    { label: 'Attendance Monitor',      path: '/portal/vp/attendance',                   icon: UserCheck },
+    { label: 'Academic Table & Holidays',path: '/portal/vp/academic-calendar',            icon: CalendarCheck },
+    { label: 'Complaints Management',   path: '/portal/vp/complaints',                   icon: AlertCircle },
+    { label: 'Notices',                 path: '/portal/vp/notices',                      icon: Bell },
   ],
   ACCOUNTS_HEAD: [
-    { label: 'Financials Overview', path: '/portal/accounts-head',              icon: LayoutDashboard },
-    { label: 'Payment Desk',        path: '/portal/accounts-head/payments',     icon: CreditCard },
-    { label: 'Fee Structure',       path: '/portal/accounts-head/structures',   icon: Settings },
-    { label: 'Salary Management',   path: '/portal/accounts-head/salaries',     icon: DollarSign },
-    { label: 'Notices',             path: '/portal/accounts-head/notices',      icon: Bell },
+    { label: 'Cashier Dashboard',   path: '/portal/accounts-head',            icon: LayoutDashboard },
+    { label: 'Receive Payment',     path: '/portal/accounts-head/collect',    icon: DollarSign },
+    { label: 'Billing Registry',    path: '/portal/accounts-head/payments',   icon: CreditCard },
+    { label: 'Fee Structures',      path: '/portal/accounts-head/structures', icon: Settings },
+    { label: 'Salaries & Payroll',  path: '/portal/accounts-head/salaries',   icon: Users },
+    { label: 'Financial Audit',     path: '/portal/accounts-head/audit',      icon: Activity },
+    { label: 'Academic Calendar',   path: '/portal/accounts-head/calendar',   icon: CalendarCheck },
   ],
   ACCOUNTS_OFFICER: [
-    { label: 'Financials Overview', path: '/portal/accounts-officer',            icon: LayoutDashboard },
-    { label: 'Payment Desk',        path: '/portal/accounts-officer/payments',   icon: CreditCard },
-    { label: 'Fee Structure',       path: '/portal/accounts-officer/structures', icon: Settings },
-    { label: 'Salary Management',   path: '/portal/accounts-officer/salaries',   icon: DollarSign },
-    { label: 'Notices',             path: '/portal/accounts-officer/notices',    icon: Bell },
+    { label: 'Cashier Dashboard',   path: '/portal/accounts-officer',            icon: LayoutDashboard },
+    { label: 'Receive Payment',     path: '/portal/accounts-officer/collect',    icon: DollarSign },
+    { label: 'Billing Registry',    path: '/portal/accounts-officer/payments',   icon: CreditCard },
+    { label: 'Fee Structures',      path: '/portal/accounts-officer/structures', icon: Settings },
+    { label: 'Salaries & Payroll',  path: '/portal/accounts-officer/salaries',   icon: Users },
+    { label: 'Financial Audit',     path: '/portal/accounts-officer/audit',      icon: Activity },
+    { label: 'Academic Calendar',   path: '/portal/accounts-officer/calendar',   icon: CalendarCheck },
   ],
   ADMIN: [
     { label: 'Admin Dashboard', path: '/portal/admin',          icon: LayoutDashboard },
-    { label: 'User Management', path: '/portal/admin/users',    icon: Users },
-    { label: 'College Config',  path: '/portal/admin/settings', icon: Settings },
-    { label: 'Security Logs',   path: '/portal/admin/audit',    icon: Activity },
-    { label: 'Notice Board',    path: '/portal/admin/notices',  icon: Bell },
+    { label: 'User Directory',  path: '/portal/admin/users',    icon: Users },
+    { label: 'System Settings', path: '/portal/admin/settings', icon: Settings },
+    { label: 'Audit Logs',      path: '/portal/admin/audit',    icon: Activity },
+    { label: 'Academic Calendar',path: '/portal/admin/calendar',icon: CalendarCheck },
   ],
   CHAIRPERSON: [
-    { label: 'Chairperson Portal',    path: '/portal/chairperson',          icon: LayoutDashboard },
-    { label: 'Academic Reports',      path: '/portal/chairperson/academics',icon: GraduationCap },
-    { label: 'Financial Summaries',   path: '/portal/chairperson/finance',  icon: DollarSign },
-    { label: 'Notices',               path: '/portal/chairperson/notices',  icon: Bell },
+    { label: 'Overview',        path: '/portal/chairperson',                     icon: LayoutDashboard },
+    { label: 'Financial Board', path: '/portal/chairperson/finance',             icon: BarChart2 },
+    { label: 'Staff Registry',  path: '/portal/chairperson/staff',               icon: Users },
+    { label: 'Academic Table & Holidays',path: '/portal/chairperson/academic-calendar',icon: CalendarCheck },
   ],
   HR: [
     { label: 'HR Dashboard',    path: '/portal/hr',             icon: LayoutDashboard },
-    { label: 'Employee Records',path: '/portal/hr/users',       icon: Users },
-    { label: 'Staff Attendance',path: '/portal/hr/attendance',  icon: UserCheck },
-    { label: 'Notice Board',    path: '/portal/hr/notices',     icon: Bell },
+    { label: 'Staff Registry',  path: '/portal/hr/staff',       icon: Users },
+    { label: 'Attendance',      path: '/portal/hr/attendance',  icon: UserCheck },
+    { label: 'Payroll & Salary',path: '/portal/hr/salary',      icon: DollarSign },
+    { label: 'Academic Calendar',path: '/portal/hr/calendar',   icon: CalendarCheck },
   ],
   LIBRARIAN: [
-    { label: 'Librarian Portal', path: '/portal/librarian',       icon: LayoutDashboard },
-    { label: 'Book Management',  path: '/portal/librarian/books', icon: Library },
+    { label: 'Library Overview', path: '/portal/librarian',        icon: LayoutDashboard },
+    { label: 'Book Inventory',   path: '/portal/librarian/books',  icon: BookOpen },
+    { label: 'Checked Out',      path: '/portal/librarian/issued', icon: ClipboardList },
     { label: 'Notice Board',     path: '/portal/librarian/notices',icon: Bell },
+    { label: 'Academic Calendar',path: '/portal/librarian/calendar',icon: CalendarCheck },
   ],
   EXAM_DEPT: [
     { label: 'Exam Dashboard',    path: '/portal/exam-dept',          icon: LayoutDashboard },
     { label: 'Exams Scheduling',  path: '/portal/exam-dept/exams',    icon: CalendarCheck },
     { label: 'Seat Allocations',  path: '/portal/exam-dept/seats',    icon: GraduationCap },
+    { label: 'Results Mgmt',      path: '/portal/exam-dept/results',  icon: FileText },
+    { label: 'Academic Calendar', path: '/portal/exam-dept/calendar', icon: CalendarCheck },
     { label: 'Notice Board',      path: '/portal/exam-dept/notices',  icon: Bell },
   ],
   RECEPTION: [
-    { label: 'Register Student',     path: '/portal/reception',            icon: LayoutDashboard },
-    { label: 'All Students',         path: '/portal/reception/students',   icon: Users },
-    { label: 'Attendance Monitor',   path: '/portal/reception/attendance', icon: UserCheck },
-    { label: 'Absent Today',         path: '/portal/reception/absent',     icon: Bell },
+    { label: 'Register Student',     path: '/portal/reception',            icon: UserPlus },
+    { label: 'Student Directory',    path: '/portal/reception/students',   icon: Users },
+    { label: 'Attendance Terminal',  path: '/portal/reception/attendance', icon: UserCheck },
+    { label: 'Absent Today',         path: '/portal/reception/absent',     icon: AlertCircle },
+    { label: 'Academic Calendar',    path: '/portal/reception/calendar',   icon: CalendarCheck },
   ],
 };
 
@@ -125,7 +159,7 @@ export default function Navbar() {
   // Clock tick
   useEffect(() => {
     setCurrentDate(new Date());
-    const interval = setInterval(() => setCurrentDate(new Date()), 60000);
+    const interval = setInterval(() => setCurrentDate(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -210,10 +244,10 @@ export default function Navbar() {
           <span>{getCalendarDisplay() || 'Loading dates...'}</span>
         </div>
 
-        <button onClick={toggleDateMode} className={styles.calendarToggle}>
-          {dateMode === 'AD' ? <ToggleLeft size={20} /> : <ToggleRight size={20} />}
-          <span>Mode: {dateMode}</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 14px', borderRadius: '10px', background: 'var(--surface-sunken)', color: 'var(--text-main)', fontWeight: 700, fontSize: '0.85rem', border: '1px solid var(--border-color)' }}>
+          <Clock size={16} color="#6366F1" />
+          <span>{currentDate ? currentDate.toLocaleTimeString('en-US', { timeZone: 'Asia/Kathmandu', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Loading time...'}</span>
+        </div>
 
         <button onClick={toggleTheme} className={styles.themeToggle} aria-label="Toggle Theme">
           {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}

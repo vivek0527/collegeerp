@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyJWT, hashPassword } from '@/lib/auth';
 import prisma from '@/lib/db';
+import { AuditEngine } from '@/lib/auditEngine';
 import fs from 'fs';
 import path from 'path';
 
@@ -105,22 +106,64 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
+  // Check if Admission Portal & Department-wise Switch is open
+  const sessionStorePath = path.join(process.cwd(), 'src', 'lib', 'mockAcademicSessions.json');
+  let isAdmissionOpen = true;
+  let activeAy = '2083-2084 BS';
+  let allowedDepts: string[] = [];
+
+  try {
+    if (fs.existsSync(sessionStorePath)) {
+      const sessions = JSON.parse(fs.readFileSync(sessionStorePath, 'utf-8'));
+      const activeObj = sessions.find((x: any) => x.isActive) || sessions[0];
+      if (activeObj) {
+        isAdmissionOpen = !!activeObj.isAdmissionOpen;
+        activeAy = activeObj.sessionName || activeAy;
+        if (activeObj.departments && Array.isArray(activeObj.departments)) {
+          allowedDepts = activeObj.departments
+            .filter((d: any) => d.isAdmissionOpen)
+            .map((d: any) => d.code.toUpperCase());
+        }
+      }
+    }
+  } catch (e) {}
+
+  if (!isAdmissionOpen) {
+    return NextResponse.json({ 
+      error: 'Admission Portal is currently CLOSED by Executive Management for all departments.' 
+    }, { status: 403 });
+  }
+
   const {
     // Student
     studentName, studentEmail, studentPhone, studentPassword,
     rollNumber, admissionNumber, classId, className, dateOfBirthBS,
+    department, shift, seeGpa, entranceMark, academicYear,
     // Parent
     parentName, parentEmail, parentPhone, parentPassword, parentOccupation,
+    // Scholarship
+    scholarshipSchemeId, scholarshipRemarks
   } = await request.json();
 
-  if (!studentName || !studentEmail || !studentPassword || !rollNumber || !admissionNumber) {
-    return NextResponse.json({ error: 'Missing required student fields' }, { status: 400 });
+  if (!studentName || !studentEmail || !studentPassword || !admissionNumber) {
+    return NextResponse.json({ error: 'Missing required student fields (Name, Email, Password, Admission No)' }, { status: 400 });
   }
   if (!parentName || !parentEmail || !parentPassword) {
     return NextResponse.json({ error: 'Missing required parent fields' }, { status: 400 });
   }
   if (studentEmail === parentEmail) {
     return NextResponse.json({ error: 'Student and parent must have different email addresses' }, { status: 400 });
+  }
+
+  // Department-specific ON/OFF Portal Switch validation
+  if (department && allowedDepts.length > 0) {
+    const targetCode = String(department).toUpperCase();
+    const isDeptOpen = allowedDepts.some(code => targetCode.includes(code) || code.includes(targetCode));
+    if (!isDeptOpen) {
+      return NextResponse.json({ 
+        error: `Admission Portal for [${department}] is currently TURNED OFF by Executive Management (Principal/VP/Chairperson).` 
+      }, { status: 403 });
+    }
   }
 
   // Try DB
@@ -132,7 +175,6 @@ export async function POST(request: NextRequest) {
       const studentHash = await hashPassword(studentPassword);
       const parentHash = await hashPassword(parentPassword);
 
-      // Find or use provided classId
       let resolvedClassId = classId;
       if (!resolvedClassId) {
         const cls = await prisma.class.findFirst({ where: { collegeId: payload.collegeId } });
@@ -185,6 +227,50 @@ export async function POST(request: NextRequest) {
         return { studentUser, studentProfile, parentUser, parentProfile };
       });
 
+      // Automatic Audit Event Generation via Central AuditEngine
+      await AuditEngine.recordEvent({
+        moduleName: 'RECEPTION',
+        entityType: 'STUDENT',
+        entityId: result.studentProfile.id,
+        referenceNumber: admissionNumber,
+        studentId: result.studentProfile.id,
+        createdBy: payload.name || 'Reception Staff',
+        userRole: payload.role,
+        actionPerformed: 'STUDENT_CREATED',
+        newValue: { studentName, studentEmail, rollNumber, admissionNumber, className, scholarshipSchemeId },
+        reason: `New student registration created at Front Desk by Reception.`,
+        collegeId: payload.collegeId
+      });
+
+      if (scholarshipSchemeId) {
+        // Look up scheme
+        const schemesPath = path.join(process.cwd(), 'src', 'lib', 'mockScholarshipSchemes.json');
+        let schemeName = 'Unknown Scheme';
+        let schemeVal = 'Unknown';
+        try {
+          const schemes = JSON.parse(fs.readFileSync(schemesPath, 'utf-8'));
+          const s = schemes.find((x: any) => x.id === scholarshipSchemeId);
+          if (s) {
+            schemeName = s.name;
+            schemeVal = s.discountType === 'PERCENTAGE' ? `${s.discountValue}%` : `NPR ${s.discountValue}`;
+          }
+        } catch(e) {}
+
+        await AuditEngine.recordEvent({
+          moduleName: 'RECEPTION',
+          entityType: 'SCHOLARSHIP',
+          entityId: result.studentProfile.id,
+          referenceNumber: admissionNumber,
+          studentId: result.studentProfile.id,
+          createdBy: payload.name || 'Reception Staff',
+          userRole: payload.role,
+          actionPerformed: 'SCHOLARSHIP_GRANTED',
+          newValue: { schemeId: scholarshipSchemeId, schemeName, schemeValue: schemeVal, remarks: scholarshipRemarks },
+          reason: scholarshipRemarks || `Authorized scholarship scheme [${schemeName}] granted at registration.`,
+          collegeId: payload.collegeId
+        });
+      }
+
       return NextResponse.json({ success: true, data: result, mode: 'db' });
     } catch (e: any) {
       if (e.code === 'P2002') {
@@ -209,16 +295,22 @@ export async function POST(request: NextRequest) {
   const sid = `local-student-${Date.now()}`;
   const pid = `local-parent-${Date.now() + 1}`;
 
-  const record: MockRegistration = {
+  const record: any = {
     id: `reg-${Date.now()}`,
     collegeId: payload.collegeId,
     studentId: sid,
     studentName,
     studentEmail,
     studentPhone: studentPhone || '',
-    rollNumber,
+    rollNumber: rollNumber || '',
     admissionNumber,
-    className: className || classId || 'Grade 11',
+    className: className || department || 'Unassigned Department',
+    department: department || 'Science',
+    shift: shift || 'Day',
+    seeGpa: seeGpa || '',
+    entranceMark: entranceMark || '',
+    academicYear: academicYear || activeAy,
+    section: '',
     dateOfBirthBS: dateOfBirthBS || '',
     parentId: pid,
     parentName,
@@ -230,6 +322,50 @@ export async function POST(request: NextRequest) {
 
   store.push(record);
   writeStore(store);
+
+  // Automatic Audit Event Generation via Central AuditEngine
+  await AuditEngine.recordEvent({
+    moduleName: 'RECEPTION',
+    entityType: 'STUDENT',
+    entityId: sid,
+    referenceNumber: admissionNumber,
+    studentId: sid,
+    createdBy: payload.name || 'Reception Staff',
+    userRole: payload.role,
+    actionPerformed: 'STUDENT_CREATED',
+    newValue: { studentName, studentEmail, rollNumber, admissionNumber, className, scholarshipSchemeId },
+    reason: `New student registration created at Front Desk by Reception.`,
+    collegeId: payload.collegeId
+  });
+
+  if (scholarshipSchemeId) {
+    // Look up scheme
+    const schemesPath = path.join(process.cwd(), 'src', 'lib', 'mockScholarshipSchemes.json');
+    let schemeName = 'Unknown Scheme';
+    let schemeVal = 'Unknown';
+    try {
+      const schemes = JSON.parse(fs.readFileSync(schemesPath, 'utf-8'));
+      const s = schemes.find((x: any) => x.id === scholarshipSchemeId);
+      if (s) {
+        schemeName = s.name;
+        schemeVal = s.discountType === 'PERCENTAGE' ? `${s.discountValue}%` : `NPR ${s.discountValue}`;
+      }
+    } catch(e) {}
+
+    await AuditEngine.recordEvent({
+      moduleName: 'RECEPTION',
+      entityType: 'SCHOLARSHIP',
+      entityId: sid,
+      referenceNumber: admissionNumber,
+      studentId: sid,
+      createdBy: payload.name || 'Reception Staff',
+      userRole: payload.role,
+      actionPerformed: 'SCHOLARSHIP_GRANTED',
+      newValue: { schemeId: scholarshipSchemeId, schemeName, schemeValue: schemeVal, remarks: scholarshipRemarks },
+      reason: scholarshipRemarks || `Authorized scholarship scheme [${schemeName}] granted at registration.`,
+      collegeId: payload.collegeId
+    });
+  }
 
   return NextResponse.json({
     success: true,

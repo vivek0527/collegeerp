@@ -16,6 +16,7 @@ import {
   CheckCircle,
   DollarSign,
 } from 'lucide-react';
+import AcademicCalendarManager from './AcademicCalendarManager';
 
 export default function StaffDashboard({ subPage }: { subPage?: string }) {
   const { formatDate } = useDate();
@@ -27,6 +28,7 @@ export default function StaffDashboard({ subPage }: { subPage?: string }) {
   const [examName, setExamName] = useState('');
   const [examType, setExamType] = useState('TERMINAL');
   const [examMsg, setExamMsg] = useState({ text: '', type: '' });
+
 
   useEffect(() => {
     async function loadData() {
@@ -96,21 +98,21 @@ export default function StaffDashboard({ subPage }: { subPage?: string }) {
             <tr>
               <td>EMP-TCH-01</td>
               <td>Mr. Santosh Dahal</td>
-              <td>teacher@kmc.edu.np</td>
+              <td>teacher@emc.edu.np</td>
               <td>NPR 55,000</td>
               <td><span className="badge badge-success">PAID</span></td>
             </tr>
             <tr>
               <td>EMP-LIB-01</td>
               <td>Mrs. Sita Devkota</td>
-              <td>librarian@kmc.edu.np</td>
+              <td>librarian@emc.edu.np</td>
               <td>NPR 35,000</td>
               <td><span className="badge badge-success">PAID</span></td>
             </tr>
             <tr>
               <td>EMP-ACC-01</td>
               <td>Miss Laxmi Thapa</td>
-              <td>accofficer@kmc.edu.np</td>
+              <td>accofficer@emc.edu.np</td>
               <td>NPR 40,000</td>
               <td><span className="badge badge-success">PAID</span></td>
             </tr>
@@ -413,19 +415,17 @@ export default function StaffDashboard({ subPage }: { subPage?: string }) {
       return renderNoticesCard();
     }
 
+    if (sub === 'calendar' || sub === 'academic-calendar') {
+      return <AcademicCalendarManager userRole={role.replace('_', ' ')} />;
+    }
+
     if (sub === 'salary') {
       return renderSalaryCard();
     }
 
     if (role === 'HR') {
-      switch (sub) {
-        case 'users':
-          return renderHREmployeeRegistry();
-        case 'attendance':
-          return renderHRAttendanceLogs();
-        default:
-          return <div className={styles.sectionCard}><p>HR operational task: {subPage}</p></div>;
-      }
+      if (sub === 'attendance') return renderHRAttendanceLogs();
+      return renderHREmployeeRegistry();
     }
 
     if (role === 'LIBRARIAN') {
@@ -438,14 +438,8 @@ export default function StaffDashboard({ subPage }: { subPage?: string }) {
     }
 
     if (role === 'EXAM_DEPT') {
-      switch (sub) {
-        case 'exams':
-          return renderExamSessions();
-        case 'seats':
-          return renderSeatPlansCard();
-        default:
-          return <div className={styles.sectionCard}><p>Exam event log: {subPage}</p></div>;
-      }
+      if (sub === 'seats') return renderSeatPlansCard();
+      return renderExamSessions();
     }
 
     return <div className={styles.sectionCard}><p>Staff operation module placeholder.</p></div>;

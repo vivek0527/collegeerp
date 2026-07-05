@@ -14,19 +14,19 @@ import {
 } from 'lucide-react';
 
 const DEMO_ACCOUNTS = [
-  { label: 'System Admin', email: 'admin@kmc.edu.np', password: 'Password123', role: 'ADMIN' },
-  { label: 'College Chairperson', email: 'chairperson@kmc.edu.np', password: 'Password123', role: 'CHAIRPERSON' },
-  { label: 'Campus Principal', email: 'principal@kmc.edu.np', password: 'Password123', role: 'PRINCIPAL' },
-  { label: 'Vice Principal', email: 'vp@kmc.edu.np', password: 'Password123', role: 'VICE_PRINCIPAL' },
-  { label: 'Academic Teacher', email: 'teacher@kmc.edu.np', password: 'Password123', role: 'TEACHER' },
-  { label: 'College Student', email: 'student@kmc.edu.np', password: 'Password123', role: 'STUDENT' },
-  { label: 'Student Parent', email: 'parent@kmc.edu.np', password: 'Password123', role: 'PARENT' },
-  { label: 'Accounts Manager', email: 'acchead@kmc.edu.np', password: 'Password123', role: 'ACCOUNTS_HEAD' },
-  { label: 'Accounts Officer', email: 'accofficer@kmc.edu.np', password: 'Password123', role: 'ACCOUNTS_OFFICER' },
-  { label: 'HR Manager', email: 'hr@kmc.edu.np', password: 'Password123', role: 'HR' },
-  { label: 'College Librarian', email: 'librarian@kmc.edu.np', password: 'Password123', role: 'LIBRARIAN' },
-  { label: 'Exam Administrator', email: 'examdept@kmc.edu.np', password: 'Password123', role: 'EXAM_DEPT' },
-  { label: 'Reception Desk', email: 'reception@kmc.edu.np', password: 'Password123', role: 'RECEPTION' },
+  { label: 'System Admin', email: 'admin@emc.edu.np', password: 'Password123', role: 'ADMIN' },
+  { label: 'College Chairperson', email: 'chairperson@emc.edu.np', password: 'Password123', role: 'CHAIRPERSON' },
+  { label: 'Campus Principal', email: 'principal@emc.edu.np', password: 'Password123', role: 'PRINCIPAL' },
+  { label: 'Vice Principal', email: 'vp@emc.edu.np', password: 'Password123', role: 'VICE_PRINCIPAL' },
+  { label: 'Academic Teacher', email: 'teacher@emc.edu.np', password: 'Password123', role: 'TEACHER' },
+  { label: 'College Student', email: 'student@emc.edu.np', password: 'Password123', role: 'STUDENT' },
+  { label: 'Student Parent', email: 'parent@emc.edu.np', password: 'Password123', role: 'PARENT' },
+  { label: 'Accounts Manager', email: 'acchead@emc.edu.np', password: 'Password123', role: 'ACCOUNTS_HEAD' },
+  { label: 'Accounts Officer', email: 'accofficer@emc.edu.np', password: 'Password123', role: 'ACCOUNTS_OFFICER' },
+  { label: 'HR Manager', email: 'hr@emc.edu.np', password: 'Password123', role: 'HR' },
+  { label: 'College Librarian', email: 'librarian@emc.edu.np', password: 'Password123', role: 'LIBRARIAN' },
+  { label: 'Exam Administrator', email: 'examdept@emc.edu.np', password: 'Password123', role: 'EXAM_DEPT' },
+  { label: 'Reception Desk', email: 'reception@emc.edu.np', password: 'Password123', role: 'RECEPTION' },
 ];
 
 export default function LoginPage() {

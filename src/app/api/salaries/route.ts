@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { verifyJWT } from '@/lib/auth';
+import { AuditEngine } from '@/lib/auditEngine';
 import fs from 'fs';
 import path from 'path';
 
@@ -67,11 +68,11 @@ function getLocalSalaries(collegeId: string): LocalSalarySlip[] {
           payPeriod: 'Asar 2083',
           status: 'PAID',
           maxLeavesAllowed: 2,
-          actualLeaves: 4, // 2 extra leaves taken
-          deductionType: 'AUTO_PER_DAY', // basicSalary/30 = 1333.33 per day => total cut: 2666.66
+          actualLeaves: 4,
+          deductionType: 'AUTO_PER_DAY',
           deductionValue: 0,
           leaveCutAmount: 2667,
-          netSalary: 38833, // 40000 + 2000 - 500 - 2667
+          netSalary: 38833,
           createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
         }
       ];
@@ -110,8 +111,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (isDbOnline) {
-      if (['ACCOUNTS_HEAD', 'ACCOUNTS_OFFICER', 'ADMIN', 'PRINCIPAL', 'VICE_PRINCIPAL'].includes(payload.role)) {
-        // Management fetches all slips
+      if (['ACCOUNTS_HEAD', 'ACCOUNTS_OFFICER', 'ADMIN', 'PRINCIPAL', 'VICE_PRINCIPAL', 'HR'].includes(payload.role)) {
         const slips = await prisma.salarySlip.findMany({
           where: { collegeId: payload.collegeId },
           include: {
@@ -121,7 +121,6 @@ export async function GET(request: NextRequest) {
         });
         return NextResponse.json({ salarySlips: slips });
       } else {
-        // Teacher or staff fetches their own
         const slips = await prisma.salarySlip.findMany({
           where: {
             collegeId: payload.collegeId,
@@ -135,9 +134,8 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ salarySlips: slips });
       }
     } else {
-      // Fallback local file mode
       const local = getLocalSalaries(payload.collegeId);
-      if (['ACCOUNTS_HEAD', 'ACCOUNTS_OFFICER', 'ADMIN', 'PRINCIPAL', 'VICE_PRINCIPAL'].includes(payload.role)) {
+      if (['ACCOUNTS_HEAD', 'ACCOUNTS_OFFICER', 'ADMIN', 'PRINCIPAL', 'VICE_PRINCIPAL', 'HR'].includes(payload.role)) {
         return NextResponse.json({
           salarySlips: local.map(s => ({
             id: s.id,
@@ -157,7 +155,6 @@ export async function GET(request: NextRequest) {
           }))
         });
       } else {
-        // Fetch only for current logged in user
         const userSlips = local.filter(s => {
           if (payload.role === 'TEACHER') {
             return s.userRole === 'TEACHER';
@@ -197,7 +194,7 @@ export async function POST(request: NextRequest) {
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const payload = await verifyJWT(token);
-    if (!payload || !['ACCOUNTS_HEAD', 'ADMIN'].includes(payload.role)) {
+    if (!payload || !['ACCOUNTS_HEAD', 'HR', 'ADMIN'].includes(payload.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -225,12 +222,10 @@ export async function POST(request: NextRequest) {
     const allow = parseFloat(allowances || 0);
     const deduct = parseFloat(deductions || 0);
     
-    // Leaves and cut calculations
     const maxL = parseInt(maxLeavesAllowed || 2);
     const actL = parseInt(actualLeaves || 0);
     const dedType = deductionType || 'AUTO_PER_DAY';
     const dedVal = parseFloat(deductionValue || 0);
-    // Use the actual days in the selected Nepali month; fallback to 30 if not provided
     const monthDays = parseInt(daysInMonth || 30);
 
     const extraLeaves = Math.max(0, actL - maxL);
@@ -276,6 +271,22 @@ export async function POST(request: NextRequest) {
           user: { select: { name: true, role: true } }
         }
       });
+
+      // Automatic Audit Event Generation via Central AuditEngine
+      await AuditEngine.recordEvent({
+        moduleName: payload.role === 'HR' ? 'HR' : 'ACCOUNTS_HEAD',
+        entityType: 'SALARY',
+        entityId: newSlip.id,
+        staffId: userId,
+        createdBy: payload.name || 'HR / Accounts Head',
+        userRole: payload.role,
+        actionPerformed: 'SALARY_PROCESSED',
+        newValue: { basicSalary: basic, allowances: allow, deductions: deduct, netSalary: net, payPeriod, status },
+        reason: `Monthly payroll processed for employee (Pay period: ${payPeriod}).`,
+        amount: net,
+        collegeId: payload.collegeId
+      });
+
       return NextResponse.json({ success: true, salarySlip: newSlip });
     } else {
       // Local fallback mode
@@ -301,6 +312,22 @@ export async function POST(request: NextRequest) {
       };
       local.push(newSlip);
       saveLocalSalaries(local);
+
+      // Automatic Audit Event Generation via Central AuditEngine
+      await AuditEngine.recordEvent({
+        moduleName: payload.role === 'HR' ? 'HR' : 'ACCOUNTS_HEAD',
+        entityType: 'SALARY',
+        entityId: newSlip.id,
+        staffId: userId,
+        createdBy: payload.name || 'HR / Accounts Head',
+        userRole: payload.role,
+        actionPerformed: 'SALARY_PROCESSED',
+        newValue: { basicSalary: basic, allowances: allow, deductions: deduct, netSalary: net, payPeriod, status },
+        reason: `Monthly payroll processed for employee (Pay period: ${payPeriod}).`,
+        amount: net,
+        collegeId: payload.collegeId
+      });
+
       return NextResponse.json({
         success: true,
         salarySlip: {
@@ -333,7 +360,7 @@ export async function DELETE(request: NextRequest) {
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const payload = await verifyJWT(token);
-    if (!payload || !['ACCOUNTS_HEAD', 'ADMIN'].includes(payload.role)) {
+    if (!payload || !['ACCOUNTS_HEAD', 'ADMIN', 'HR'].includes(payload.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -352,13 +379,27 @@ export async function DELETE(request: NextRequest) {
       await prisma.salarySlip.delete({
         where: { id }
       });
-      return NextResponse.json({ success: true, message: 'Salary slip deleted successfully' });
     } else {
       const local = getLocalSalaries(payload.collegeId);
       const filtered = local.filter(s => s.id !== id);
       saveLocalSalaries(filtered);
-      return NextResponse.json({ success: true, message: 'Salary slip deleted successfully' });
     }
+
+    // Automatic Audit Event Generation via Central AuditEngine
+    await AuditEngine.recordEvent({
+      moduleName: payload.role === 'HR' ? 'HR' : 'ACCOUNTS_HEAD',
+      entityType: 'SALARY',
+      entityId: id,
+      createdBy: payload.name || 'HR / Accounts Head',
+      userRole: payload.role,
+      actionPerformed: 'SALARY_DELETED',
+      previousValue: { id },
+      newValue: { status: 'DELETED' },
+      reason: `Salary slip record (${id}) deleted by ${payload.name || payload.role}.`,
+      collegeId: payload.collegeId
+    });
+
+    return NextResponse.json({ success: true, message: 'Salary slip deleted successfully' });
   } catch (error) {
     console.error('Salary delete error:', error);
     return NextResponse.json({ error: 'Server Error' }, { status: 500 });

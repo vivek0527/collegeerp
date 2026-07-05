@@ -1,0 +1,6 @@
+[
+  { "id": "dept-1", "name": "Science", "code": "S" },
+  { "id": "dept-2", "name": "Management", "code": "M" },
+  { "id": "dept-3", "name": "Humanities", "code": "H" },
+  { "id": "dept-4", "name": "Computer Science", "code": "CS" }
+]

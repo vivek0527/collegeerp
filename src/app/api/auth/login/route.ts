@@ -1,21 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { comparePassword, signJWT } from '@/lib/auth';
+import fs from 'fs';
+import path from 'path';
 
 const DEMO_ACCOUNTS = [
-  { name: 'Admin Administrator', email: 'admin@kmc.edu.np', role: 'ADMIN' },
-  { name: 'Dr. Hari Prasad Sharma', email: 'chairperson@kmc.edu.np', role: 'CHAIRPERSON' },
-  { name: 'Prof. Ramesh Bhattarai', email: 'principal@kmc.edu.np', role: 'PRINCIPAL' },
-  { name: 'Mrs. Geeta Adhikari', email: 'vp@kmc.edu.np', role: 'VICE_PRINCIPAL' },
-  { name: 'Mr. Shiva Raj Joshi', email: 'acchead@kmc.edu.np', role: 'ACCOUNTS_HEAD' },
-  { name: 'Miss Laxmi Thapa', email: 'accofficer@kmc.edu.np', role: 'ACCOUNTS_OFFICER' },
-  { name: 'Mr. Binod Kafle', email: 'hr@kmc.edu.np', role: 'HR' },
-  { name: 'Mrs. Sita Devkota', email: 'librarian@kmc.edu.np', role: 'LIBRARIAN' },
-  { name: 'Mr. Arjun Poudel', email: 'examdept@kmc.edu.np', role: 'EXAM_DEPT' },
-  { name: 'Mr. Santosh Dahal', email: 'teacher@kmc.edu.np', role: 'TEACHER' },
-  { name: 'Niranjan Thapa', email: 'student@kmc.edu.np', role: 'STUDENT' },
-  { name: 'Ram Bahadur Thapa', email: 'parent@kmc.edu.np', role: 'PARENT' },
-  { name: 'Miss Sarita Gurung', email: 'reception@kmc.edu.np', role: 'RECEPTION' },
+  { name: 'Admin Administrator', email: 'admin@emc.edu.np', role: 'ADMIN' },
+  { name: 'Dr. Hari Prasad Sharma', email: 'chairperson@emc.edu.np', role: 'CHAIRPERSON' },
+  { name: 'Prof. Ramesh Bhattarai', email: 'principal@emc.edu.np', role: 'PRINCIPAL' },
+  { name: 'Mrs. Geeta Adhikari', email: 'vp@emc.edu.np', role: 'VICE_PRINCIPAL' },
+  { name: 'Mr. Shiva Raj Joshi', email: 'acchead@emc.edu.np', role: 'ACCOUNTS_HEAD' },
+  { name: 'Miss Laxmi Thapa', email: 'accofficer@emc.edu.np', role: 'ACCOUNTS_OFFICER' },
+  { name: 'Mr. Binod Kafle', email: 'hr@emc.edu.np', role: 'HR' },
+  { name: 'Mrs. Sita Devkota', email: 'librarian@emc.edu.np', role: 'LIBRARIAN' },
+  { name: 'Mr. Arjun Poudel', email: 'examdept@emc.edu.np', role: 'EXAM_DEPT' },
+  { name: 'Mr. Santosh Dahal', email: 'teacher@emc.edu.np', role: 'TEACHER' },
+  { name: 'Niranjan Thapa', email: 'student@emc.edu.np', role: 'STUDENT' },
+  { name: 'Ram Bahadur Thapa', email: 'parent@emc.edu.np', role: 'PARENT' },
+  { name: 'Miss Sarita Gurung', email: 'reception@emc.edu.np', role: 'RECEPTION' },
 ];
 
 export async function POST(request: NextRequest) {
@@ -65,16 +67,49 @@ export async function POST(request: NextRequest) {
           collegeId: 'mock-college-id',
           college: {
             id: 'mock-college-id',
-            name: 'Kathmandu Model College (DEMO MODE)',
+            name: 'Everest College (DEMO MODE)',
             datePreference: 'BS',
           },
         };
       } else {
-        return NextResponse.json({
-          error: fallbackMode 
-            ? 'Database is offline. Please enter a valid demo portal role credentials (e.g. admin@kmc.edu.np / Password123).'
-            : 'Invalid credentials'
-        }, { status: 401 });
+        // Check if it's a newly registered offline student/parent
+        let localMatch = null;
+        try {
+          const storePath = path.join(process.cwd(), 'src', 'lib', 'mockStudentRegistrations.json');
+          if (fs.existsSync(storePath)) {
+            const regs = JSON.parse(fs.readFileSync(storePath, 'utf-8'));
+            for (const r of regs) {
+              if (r.studentEmail === email) {
+                localMatch = { role: 'STUDENT', name: r.studentName, id: r.studentId };
+                break;
+              } else if (r.parentEmail === email) {
+                localMatch = { role: 'PARENT', name: r.parentName, id: r.parentId };
+                break;
+              }
+            }
+          }
+        } catch (e) {}
+
+        if (localMatch) {
+          user = {
+            id: localMatch.id,
+            email: email,
+            name: localMatch.name,
+            role: localMatch.role,
+            collegeId: 'mock-college-id',
+            college: {
+              id: 'mock-college-id',
+              name: 'Everest College (DEMO MODE)',
+              datePreference: 'BS',
+            },
+          };
+        } else {
+          return NextResponse.json({
+            error: fallbackMode 
+              ? 'Database is offline. Invalid credentials.'
+              : 'Invalid credentials'
+          }, { status: 401 });
+        }
       }
     }
 

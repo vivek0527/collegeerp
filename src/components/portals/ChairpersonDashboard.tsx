@@ -11,7 +11,10 @@ import {
   Bell,
   FileText,
   Activity,
+  Calendar,
 } from 'lucide-react';
+import AcademicCalendarManager from './AcademicCalendarManager';
+import AcademicYearAdmissionControl from './AcademicYearAdmissionControl';
 
 export default function ChairpersonDashboard({ subPage }: { subPage?: string }) {
   const { formatDate } = useDate();
@@ -49,7 +52,7 @@ export default function ChairpersonDashboard({ subPage }: { subPage?: string }) 
       <div className={styles.cardHeader}>
         <h3 className={styles.cardTitle}>
           <DollarSign size={18} className="text-success" />
-          <span>Quarterly College Budget & Operational Cash Position</span>
+          <span>Quarterly College Budget &amp; Operational Cash Position</span>
         </h3>
       </div>
       
@@ -73,7 +76,7 @@ export default function ChairpersonDashboard({ subPage }: { subPage?: string }) 
               <td><span className="badge badge-warning">81.6% Achieved</span></td>
             </tr>
             <tr>
-              <td><strong>Teacher & Staff Payroll</strong></td>
+              <td><strong>Teacher &amp; Staff Payroll</strong></td>
               <td>NPR 190,000</td>
               <td className="text-danger">NPR 185,000</td>
               <td className="text-success">NPR 5,000</td>
@@ -100,41 +103,30 @@ export default function ChairpersonDashboard({ subPage }: { subPage?: string }) 
           <span>Operational Campus Statistics</span>
         </h3>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '0.9rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ color: 'var(--text-muted)' }}>Classrooms Active:</span>
-          <span>12 Rooms</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ color: 'var(--text-muted)' }}>Faculties Active:</span>
-          <span>28 Instructors</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ color: 'var(--text-muted)' }}>Library Inventory:</span>
-          <span>4,520 volumes</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ color: 'var(--text-muted)' }}>Open Student Complaints:</span>
-          <span style={{ color: 'var(--warning)', fontWeight: 600 }}>0 Open</span>
-        </div>
-      </div>
+      <p style={{ fontSize: '0.85rem', color: '#64748B' }}>
+        Real-time multi-tenant database synchronization metrics for board members.
+      </p>
     </div>
   );
 
   const renderSubPageContent = () => {
     switch (subPage?.toLowerCase()) {
-      case 'finances':
-      case 'budget':
+      case 'admissions':
+      case 'academic-years':
+      case 'admission-control':
+        return <AcademicYearAdmissionControl userRole={profile.role || 'Chairperson'} />;
+      case 'academic-calendar':
+      case 'calendar':
+      case 'events':
+      case 'emergency-holiday':
+        return <AcademicCalendarManager userRole={profile.role || 'Chairperson'} />;
+      case 'finance':
         return renderFinanceCard();
+      case 'academics':
       case 'stats':
-      case 'operational':
         return renderStatsCard();
       default:
-        return (
-          <div className={styles.sectionCard}>
-            <p>Executive module "{subPage}" template placeholder.</p>
-          </div>
-        );
+        return <AcademicCalendarManager userRole={profile.role || 'Chairperson'} />;
     }
   };
 
@@ -142,11 +134,11 @@ export default function ChairpersonDashboard({ subPage }: { subPage?: string }) 
     <div className={styles.container + " fade-in"}>
       {!subPage ? (
         <>
-          {/* Header */}
+          {/* Welcome Banner */}
           <div className={styles.welcomeSection}>
             <div className={styles.welcomeText}>
-              <h2>Executive Dashboard</h2>
-              <p>College performance reviews for: <strong>{profile.name}</strong></p>
+              <h2>Executive Chairperson Board Room</h2>
+              <p>Logged in as: <strong>{profile.name}</strong> ({profile.role})</p>
             </div>
           </div>
 

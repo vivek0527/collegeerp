@@ -11,7 +11,7 @@ async function main() {
     where: { code: 'KMC' },
     update: {},
     create: {
-      name: 'Kathmandu Model College',
+      name: 'Everest College',
       code: 'KMC',
       address: 'Bagbazar, Kathmandu, Nepal',
       phone: '+977-1-4242121',
@@ -26,18 +26,18 @@ async function main() {
 
   // 2. Create Users for all 12 roles
   const usersData = [
-    { email: 'admin@kmc.edu.np', name: 'Admin Administrator', role: UserRole.ADMIN },
-    { email: 'chairperson@kmc.edu.np', name: 'Dr. Hari Prasad Sharma', role: UserRole.CHAIRPERSON },
-    { email: 'principal@kmc.edu.np', name: 'Prof. Ramesh Bhattarai', role: UserRole.PRINCIPAL },
-    { email: 'vp@kmc.edu.np', name: 'Mrs. Geeta Adhikari', role: UserRole.VICE_PRINCIPAL },
-    { email: 'acchead@kmc.edu.np', name: 'Mr. Shiva Raj Joshi', role: UserRole.ACCOUNTS_HEAD },
-    { email: 'accofficer@kmc.edu.np', name: 'Miss Laxmi Thapa', role: UserRole.ACCOUNTS_OFFICER },
-    { email: 'hr@kmc.edu.np', name: 'Mr. Binod Kafle', role: UserRole.HR },
-    { email: 'librarian@kmc.edu.np', name: 'Mrs. Sita Devkota', role: UserRole.LIBRARIAN },
-    { email: 'examdept@kmc.edu.np', name: 'Mr. Arjun Poudel', role: UserRole.EXAM_DEPT },
-    { email: 'teacher@kmc.edu.np', name: 'Mr. Santosh Dahal', role: UserRole.TEACHER },
-    { email: 'student@kmc.edu.np', name: 'Niranjan Thapa', role: UserRole.STUDENT },
-    { email: 'parent@kmc.edu.np', name: 'Ram Bahadur Thapa', role: UserRole.PARENT },
+    { email: 'admin@emc.edu.np', name: 'Admin Administrator', role: UserRole.ADMIN },
+    { email: 'chairperson@emc.edu.np', name: 'Dr. Hari Prasad Sharma', role: UserRole.CHAIRPERSON },
+    { email: 'principal@emc.edu.np', name: 'Prof. Ramesh Bhattarai', role: UserRole.PRINCIPAL },
+    { email: 'vp@emc.edu.np', name: 'Mrs. Geeta Adhikari', role: UserRole.VICE_PRINCIPAL },
+    { email: 'acchead@emc.edu.np', name: 'Mr. Shiva Raj Joshi', role: UserRole.ACCOUNTS_HEAD },
+    { email: 'accofficer@emc.edu.np', name: 'Miss Laxmi Thapa', role: UserRole.ACCOUNTS_OFFICER },
+    { email: 'hr@emc.edu.np', name: 'Mr. Binod Kafle', role: UserRole.HR },
+    { email: 'librarian@emc.edu.np', name: 'Mrs. Sita Devkota', role: UserRole.LIBRARIAN },
+    { email: 'examdept@emc.edu.np', name: 'Mr. Arjun Poudel', role: UserRole.EXAM_DEPT },
+    { email: 'teacher@emc.edu.np', name: 'Mr. Santosh Dahal', role: UserRole.TEACHER },
+    { email: 'student@emc.edu.np', name: 'Niranjan Thapa', role: UserRole.STUDENT },
+    { email: 'parent@emc.edu.np', name: 'Ram Bahadur Thapa', role: UserRole.PARENT },
   ];
 
   const users: Record<string, any> = {};

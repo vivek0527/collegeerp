@@ -1,0 +1,42 @@
+[
+  {
+    "id": "scheme-001",
+    "name": "Entrance Exam Topper (Top 10)",
+    "discountType": "PERCENTAGE",
+    "discountValue": 100,
+    "createdBy": "Admin",
+    "collegeId": "mock-college-id"
+  },
+  {
+    "id": "scheme-002",
+    "name": "District Topper",
+    "discountType": "PERCENTAGE",
+    "discountValue": 50,
+    "createdBy": "Admin",
+    "collegeId": "mock-college-id"
+  },
+  {
+    "id": "scheme-003",
+    "name": "Sports Quota (National Level)",
+    "discountType": "FLAT_AMOUNT",
+    "discountValue": 15000,
+    "createdBy": "Admin",
+    "collegeId": "mock-college-id"
+  },
+  {
+    "id": "scheme-004",
+    "name": "Staff Child Scholarship",
+    "discountType": "PERCENTAGE",
+    "discountValue": 25,
+    "createdBy": "Admin",
+    "collegeId": "mock-college-id"
+  },
+  {
+    "id": "scheme-1783136534491",
+    "name": "entrance exam scholorship",
+    "discountType": "PERCENTAGE",
+    "discountValue": 40,
+    "createdBy": "Prof. Ramesh Bhattarai",
+    "collegeId": "mock-college-id"
+  }
+]

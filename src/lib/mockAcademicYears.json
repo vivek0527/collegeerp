@@ -1,0 +1,23 @@
+[
+  {
+    "id": "ay-1783251807171",
+    "year": "2026/2027",
+    "isActive": true,
+    "isAdmissionOpen": false,
+    "createdAt": "2026-07-05T11:43:27.171Z"
+  },
+  {
+    "id": "ay-1783251783226",
+    "year": "2026",
+    "isActive": false,
+    "isAdmissionOpen": true,
+    "createdAt": "2026-07-05T11:43:03.226Z"
+  },
+  {
+    "id": "ay-2026-2027",
+    "year": "2026/2027",
+    "isActive": false,
+    "isAdmissionOpen": true,
+    "createdAt": "2026-07-04T00:00:00.000Z"
+  }
+]

@@ -7,6 +7,7 @@ import AccountsDashboard from '@/components/portals/AccountsDashboard';
 import AdminDashboard from '@/components/portals/AdminDashboard';
 import ChairpersonDashboard from '@/components/portals/ChairpersonDashboard';
 import StaffDashboard from '@/components/portals/StaffDashboard';
+import ReceptionDashboard from '@/components/portals/ReceptionDashboard';
 
 interface PageProps {
   params: Promise<{
@@ -44,6 +45,8 @@ export default async function PortalSubRoutePage({ params }: PageProps) {
       case 'exam-dept':
       case 'staff':
         return <StaffDashboard subPage={subPage} />;
+      case 'reception':
+        return <ReceptionDashboard subPage={subPage} />;
       default:
         return (
           <div style={{ padding: '20px', color: 'var(--danger)' }}>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { verifyJWT } from '@/lib/auth';
 import { ComplaintStatus } from '@prisma/client';
+import { AuditEngine } from '@/lib/auditEngine';
 
 export async function GET(request: NextRequest) {
   try {
@@ -131,6 +132,19 @@ export async function PATCH(request: NextRequest) {
         responseContent,
         resolvedById: payload.userId,
       },
+    });
+
+    await AuditEngine.recordEvent({
+      moduleName: payload.role === 'PRINCIPAL' ? 'PRINCIPAL' : 'VICE_PRINCIPAL',
+      entityType: 'COMPLAINT_RESOLUTION',
+      entityId: id,
+      studentId: updatedComplaint.studentId || undefined,
+      createdBy: payload.name || payload.role,
+      userRole: payload.role,
+      actionPerformed: 'COMPLAINT_RESOLVED',
+      newValue: { status: status || 'RESOLVED', responseContent },
+      reason: `Complaint/Special Permission resolved by ${payload.role}. Remarks: ${responseContent?.slice(0, 50)}...`,
+      collegeId: payload.collegeId
     });
 
     return NextResponse.json({ success: true, complaint: updatedComplaint });

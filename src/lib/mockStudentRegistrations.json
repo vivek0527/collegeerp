@@ -1,0 +1,22 @@
+[
+  {
+    "id": "reg-1783136674727",
+    "collegeId": "mock-college-id",
+    "studentId": "local-student-1783136674727",
+    "studentName": "vivek yadav",
+    "studentEmail": "vivek97465@gmail.com",
+    "studentPhone": "9823627373",
+    "rollNumber": "22",
+    "admissionNumber": "abc123",
+    "className": "Grade 11 Arts",
+    "dateOfBirthBS": "2004-02-22",
+    "parentId": "local-parent-1783136674728",
+    "parentName": "mukesh yadav",
+    "parentEmail": "muskesh3323@gmail.com",
+    "parentPhone": "9832456789",
+    "parentOccupation": "bussinessman",
+    "createdAt": "2026-07-04T03:44:34.727Z",
+    "status": "REJECTED",
+    "approvalRemarks": "Rejected by Principal"
+  }
+]

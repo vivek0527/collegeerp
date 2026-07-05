@@ -61,7 +61,9 @@ export async function GET(request: NextRequest) {
           },
           teacherProfile: {
             include: {
-              subjects: true,
+              subjects: {
+                include: { class: true }
+              },
               headOfClasses: true,
             },
           },
@@ -84,7 +86,7 @@ export async function GET(request: NextRequest) {
         collegeId: payload.collegeId,
         college: {
           id: payload.collegeId,
-          name: 'Kathmandu Model College (DEMO MODE)',
+          name: 'Everest College (DEMO MODE)',
           code: 'KMC',
           datePreference: 'BS',
           timezone: 'Asia/Kathmandu',
@@ -115,7 +117,7 @@ export async function GET(request: NextRequest) {
               id: 'mock-student-profile-id',
               rollNumber: '12',
               admissionNumber: 'ADM-2026-0012',
-              user: { name: 'Niranjan Thapa', email: 'student@kmc.edu.np' },
+              user: { name: 'Niranjan Thapa', email: 'student@emc.edu.np' },
               class: { name: 'Grade 11', section: 'Science-A' },
             },
           ],
@@ -126,7 +128,13 @@ export async function GET(request: NextRequest) {
           employeeId: 'EMP-TCH-01',
           qualification: 'M.Sc. in Mathematics, TU',
           salary: 55000.0,
-          subjects: [{ id: 'mock-subject-id', name: 'Mathematics', code: 'MTH-111' }],
+          subjects: [{ 
+            id: 'mock-subject-id', 
+            name: 'Mathematics', 
+            code: 'MTH-111', 
+            classId: 'mock-class-id',
+            class: { id: 'mock-class-id', name: 'Grade 11', section: 'Science-A' }
+          }],
           headOfClasses: [{ id: 'mock-class-id', name: 'Grade 11', section: 'Science-A' }],
         };
       } else if (['HR', 'LIBRARIAN', 'ACCOUNTS_OFFICER', 'ACCOUNTS_HEAD', 'EXAM_DEPT', 'RECEPTION'].includes(payload.role)) {

@@ -1,0 +1,104 @@
+[
+  {
+    "id": "session-1783286137162",
+    "sessionName": "2084-2085",
+    "adYear": "2027-2028",
+    "isActive": true,
+    "isAdmissionOpen": true,
+    "createdAt": "2026-07-05T21:15:37.162Z",
+    "departments": [
+      {
+        "id": "dept-1783286137162-0",
+        "name": "science",
+        "code": "S",
+        "duration": "4 Years / 8 Semesters",
+        "isAdmissionOpen": true,
+        "maxCapacity": 48,
+        "enrolledCount": 0
+      }
+    ]
+  },
+  {
+    "id": "session-2083-2084",
+    "sessionName": "2083-2084 BS",
+    "adYear": "2026-2027 AD",
+    "isActive": false,
+    "isAdmissionOpen": false,
+    "createdAt": "2026-04-14T00:00:00.000Z",
+    "departments": [
+      {
+        "id": "dept-csit",
+        "name": "Computer Science & IT (BSc CSIT)",
+        "code": "CSIT",
+        "duration": "4 Years / 8 Semesters",
+        "isAdmissionOpen": true,
+        "maxCapacity": 48,
+        "enrolledCount": 32
+      },
+      {
+        "id": "dept-bba",
+        "name": "Business Administration (BBA)",
+        "code": "BBA",
+        "duration": "4 Years / 8 Semesters",
+        "isAdmissionOpen": true,
+        "maxCapacity": 60,
+        "enrolledCount": 45
+      },
+      {
+        "id": "dept-bca",
+        "name": "Computer Applications (BCA)",
+        "code": "BCA",
+        "duration": "4 Years / 8 Semesters",
+        "isAdmissionOpen": true,
+        "maxCapacity": 40,
+        "enrolledCount": 40
+      },
+      {
+        "id": "dept-civil",
+        "name": "Civil Engineering (BE Civil)",
+        "code": "CIVIL",
+        "duration": "4 Years / 8 Semesters",
+        "isAdmissionOpen": true,
+        "maxCapacity": 48,
+        "enrolledCount": 28
+      },
+      {
+        "id": "dept-hm",
+        "name": "Hotel Management (BHM)",
+        "code": "BHM",
+        "duration": "3 Years / 6 Semesters",
+        "isAdmissionOpen": false,
+        "maxCapacity": 36,
+        "enrolledCount": 30
+      }
+    ]
+  },
+  {
+    "id": "session-2082-2083",
+    "sessionName": "2082-2083 BS",
+    "adYear": "2025-2026 AD",
+    "isActive": false,
+    "isAdmissionOpen": false,
+    "createdAt": "2025-04-14T00:00:00.000Z",
+    "departments": [
+      {
+        "id": "dept-csit-old",
+        "name": "Computer Science & IT (BSc CSIT)",
+        "code": "CSIT",
+        "duration": "4 Years / 8 Semesters",
+        "isAdmissionOpen": false,
+        "maxCapacity": 48,
+        "enrolledCount": 48
+      },
+      {
+        "id": "dept-bba-old",
+        "name": "Business Administration (BBA)",
+        "code": "BBA",
+        "duration": "4 Years / 8 Semesters",
+        "isAdmissionOpen": false,
+        "maxCapacity": 60,
+        "enrolledCount": 58
+      }
+    ]
+  }
+]

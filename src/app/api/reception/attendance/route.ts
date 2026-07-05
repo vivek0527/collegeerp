@@ -14,7 +14,7 @@ function readStore() {
 }
 
 const MOCK_ATTENDANCE = [
-  { studentId: 'mock-student-id-1', studentName: 'Niranjan Thapa', className: 'Grade 11 Science-A', rollNumber: '01', status: 'PRESENT', parentName: 'Ram Bahadur Thapa', parentPhone: '+977-9841234567', parentEmail: 'parent@kmc.edu.np' },
+  { studentId: 'mock-student-id-1', studentName: 'Niranjan Thapa', className: 'Grade 11 Science-A', rollNumber: '01', status: 'PRESENT', parentName: 'Ram Bahadur Thapa', parentPhone: '+977-9841234567', parentEmail: 'parent@emc.edu.np' },
   { studentId: 'mock-student-id-2', studentName: 'Suman Karki', className: 'Grade 11 Science-A', rollNumber: '02', status: 'ABSENT', parentName: 'Hari Prasad Karki', parentPhone: '+977-9851112233', parentEmail: 'hkarki@email.com' },
   { studentId: 'mock-student-id-3', studentName: 'Priya Sharma', className: 'Grade 11 Commerce-B', rollNumber: '03', status: 'PRESENT', parentName: 'Ramesh Sharma', parentPhone: '+977-9808223344', parentEmail: 'rsharma@email.com' },
   { studentId: 'mock-student-id-4', studentName: 'Aakash Thapa', className: 'Grade 11 Commerce-B', rollNumber: '04', status: 'ABSENT', parentName: 'Dinesh Thapa', parentPhone: '+977-9867334455', parentEmail: 'dthapa@email.com' },
