@@ -315,7 +315,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
             .sub-title { font-size: 14px; font-weight: 700; color: #2563EB; margin: 6px 0 0 0; }
             .notice-box { background: #F1F5F9; border-left: 4px solid #2563EB; padding: 12px 16px; font-size: 12px; margin-bottom: 24px; line-height: 1.5; color: #334155; }
             table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-            th { background-color: #0F172A; color: #FFFFFF; padding: 10px 12px; text-align: left; font-size: 11px; text-transform: uppercase; }
+            th { background-color: #F8FAFC; color: #0F172A; border-bottom: 2px solid #E2E8F0; padding: 10px 12px; text-align: left; font-size: 11px; text-transform: uppercase; }
             td { padding: 10px 12px; border-bottom: 1px solid #E2E8F0; }
             tr:nth-child(even) { background-color: #F8FAFC; }
             .badge-holiday { background: #FEE2E2; color: #DC2626; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
@@ -459,10 +459,10 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Header Banner */}
       <div style={{
-        backgroundColor: '#0F172A',
+        backgroundColor: '#FFFFFF',
         borderRadius: '12px',
         padding: '20px 24px',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        border: '1px solid #E2E8F0',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -474,7 +474,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
             <CalendarIcon size={16} />
             <span>NEPALI BIKRAM SAMBAT (BS) ACADEMIC CALENDAR</span>
           </div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#F8FAFC', margin: '4px 0 0 0' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: '#0F172A', margin: '4px 0 0 0' }}>
             Campus Academic Schedule &amp; BS Month Calendar Grid
           </h2>
         </div>
@@ -486,7 +486,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
               padding: '8px 14px',
               borderRadius: '8px',
               backgroundColor: '#10B981',
-              color: '#FFFFFF',
+              color: '#334155',
               fontWeight: '800',
               border: 'none',
               cursor: 'pointer',
@@ -528,26 +528,26 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* FULL BIKRAM SAMBAT MONTH CALENDAR GRID */}
           <div style={{
-            backgroundColor: '#0F172A',
+            backgroundColor: '#FFFFFF',
             borderRadius: '12px',
             padding: '24px',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            border: '1px solid #E2E8F0',
           }}>
             {/* Month Navigation Controls */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <h3 style={{ fontSize: '1.3rem', fontWeight: '900', color: '#F8FAFC', margin: 0 }}>
+                <h3 style={{ fontSize: '1.3rem', fontWeight: '900', color: '#0F172A', margin: 0 }}>
                   {bsYear} {selectedBsMonthName} BS
                 </h3>
-                <span style={{ fontSize: '0.82rem', color: '#94A3B8', backgroundColor: 'rgba(255,255,255,0.06)', padding: '3px 10px', borderRadius: '6px' }}>
+                <span style={{ fontSize: '0.82rem', color: '#94A3B8', backgroundColor: '#F1F5F9', padding: '3px 10px', borderRadius: '6px' }}>
                   {monthNamesEng[firstDayAd.getMonth()]} - {monthNamesEng[bsToAd(bsYear, bsMonth, totalDaysInBsMonth).getMonth()]} {bsToAd(bsYear, bsMonth, 1).getFullYear()} AD
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={handlePrevBsMonth} style={{ padding: '8px 14px', borderRadius: '8px', backgroundColor: '#1E293B', color: '#FFFFFF', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontWeight: '700', fontSize: '0.82rem' }}>
+                <button onClick={handlePrevBsMonth} style={{ padding: '8px 14px', borderRadius: '8px', backgroundColor: '#F8FAFC', color: '#334155', border: '1px solid #E2E8F0', cursor: 'pointer', fontWeight: '700', fontSize: '0.82rem' }}>
                   ← Prev BS Month
                 </button>
-                <button onClick={handleNextBsMonth} style={{ padding: '8px 14px', borderRadius: '8px', backgroundColor: '#1E293B', color: '#FFFFFF', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontWeight: '700', fontSize: '0.82rem' }}>
+                <button onClick={handleNextBsMonth} style={{ padding: '8px 14px', borderRadius: '8px', backgroundColor: '#F8FAFC', color: '#334155', border: '1px solid #E2E8F0', cursor: 'pointer', fontWeight: '700', fontSize: '0.82rem' }}>
                   Next BS Month →
                 </button>
               </div>
@@ -558,7 +558,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
               <div style={{ minWidth: '100%' }}>
                 {/* 7-Column Day Header Row (Sunday to Saturday) */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', marginBottom: '8px', textAlign: 'center', fontSize: '0.78rem', fontWeight: '800', color: '#64748B' }}>
-                  <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div style={{ color: '#F87171' }}>SAT (HOLIDAY)</div>
+                  <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div style={{ color: '#EF4444' }}>SAT (HOLIDAY)</div>
                 </div>
 
                 {/* 42-Cell Full BS Month Grid */}
@@ -610,7 +610,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                               {matchingDbEvent.isEmergency ? 'Emergency' : 'Holiday'}
                             </div>
                           ) : cell.isSaturday ? (
-                            <div style={{ fontSize: '0.62rem', fontWeight: '800', backgroundColor: 'rgba(239, 68, 68, 0.3)', color: '#F87171', border: '1px solid rgba(239, 68, 68, 0.5)', padding: '2px 6px', borderRadius: '4px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '0.62rem', fontWeight: '800', backgroundColor: 'rgba(239, 68, 68, 0.3)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.5)', padding: '2px 6px', borderRadius: '4px', textAlign: 'center' }}>
                               Sat Holiday
                             </div>
                           ) : isDefaultHoliday ? (
@@ -636,10 +636,10 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Hero Selected Date Bar */}
           <div style={{
-            backgroundColor: '#0F172A',
+            backgroundColor: '#FFFFFF',
             borderRadius: '12px',
             padding: '24px 20px',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            border: '1px solid #E2E8F0',
             display: 'flex',
             flexDirection: 'column',
             gap: '16px',
@@ -649,7 +649,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                 २०८३ {selectedBsMonthName} {selectedBsDay}
               </div>
               <div style={{ borderLeft: '1px solid rgba(255,255,255,0.15)', paddingLeft: '16px' }}>
-                <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#F8FAFC' }}>
+                <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0F172A' }}>
                   {bsYear} {selectedBsMonthName} {selectedBsDay} BS
                 </div>
                 <div style={{ fontSize: '0.78rem', color: '#94A3B8' }}>
@@ -673,11 +673,11 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                   {selectedDbEvent.isEmergency ? 'EMERGENCY HOLIDAY: ' : 'HOLIDAY: '} {selectedDbEvent.title}
                 </span>
               ) : selectedAdDate.getDay() === 6 ? (
-                <span style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#F87171', padding: '6px 14px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.4)', fontWeight: '800', fontSize: '0.82rem', display: 'inline-block' }}>
+                <span style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#EF4444', padding: '6px 14px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.4)', fontWeight: '800', fontSize: '0.82rem', display: 'inline-block' }}>
                   Saturday Weekly Holiday — Campus Closed
                 </span>
               ) : selectedBsDay === 5 || selectedBsDay === 20 || selectedBsDay === 21 || selectedBsDay === 25 || selectedBsDay === 27 || selectedBsDay === 28 ? (
-                <span style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#F87171', padding: '6px 14px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.4)', fontWeight: '800', fontSize: '0.82rem', display: 'inline-block' }}>
+                <span style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#EF4444', padding: '6px 14px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.4)', fontWeight: '800', fontSize: '0.82rem', display: 'inline-block' }}>
                   Public Holiday — Campus Closed
                 </span>
               ) : selectedBsDay >= 12 && selectedBsDay <= 14 ? (
@@ -745,12 +745,12 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
             {/* SINGLE CREATION OR BULK CREATION FORM */}
             {createMode === 'single' ? (
               <div style={{
-                backgroundColor: '#0F172A',
+                backgroundColor: '#FFFFFF',
                 borderRadius: '12px',
                 padding: '24px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
+                border: '1px solid #E2E8F0',
               }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#F8FAFC', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#0F172A', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Plus size={18} color="#38BDF8" />
                   <span>Add Single Academic Event / Holiday</span>
                 </h3>
@@ -764,7 +764,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                       value={title}
                       onChange={e => setTitle(e.target.value)}
                       required
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', outline: 'none' }}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', color: '#334155', outline: 'none' }}
                     />
                   </div>
 
@@ -776,7 +776,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                         value={dateAD}
                         onChange={e => setDateAD(e.target.value)}
                         required
-                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', outline: 'none' }}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', color: '#334155', outline: 'none' }}
                       />
                     </div>
                     <div>
@@ -787,7 +787,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                         value={dateBS}
                         onChange={e => setDateBS(e.target.value)}
                         required
-                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', outline: 'none' }}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', color: '#334155', outline: 'none' }}
                       />
                     </div>
                   </div>
@@ -798,7 +798,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                       <select
                         value={type}
                         onChange={e => setType(e.target.value)}
-                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', outline: 'none' }}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', color: '#334155', outline: 'none' }}
                       >
                         <option value="HOLIDAY">Public Holiday</option>
                         <option value="EXAM">Examination Routine</option>
@@ -813,7 +813,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                         placeholder="Optional notes..."
                         value={description}
                         onChange={e => setDescription(e.target.value)}
-                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', outline: 'none' }}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', color: '#334155', outline: 'none' }}
                       />
                     </div>
                   </div>
@@ -826,7 +826,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                       padding: '12px',
                       borderRadius: '6px',
                       backgroundColor: '#2563EB',
-                      color: '#FFFFFF',
+                      color: '#334155',
                       fontWeight: '700',
                       border: 'none',
                       cursor: 'pointer',
@@ -840,7 +840,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
             ) : (
               /* BULK WHOLE YEAR CREATION FORM */
               <div style={{
-                backgroundColor: '#0F172A',
+                backgroundColor: '#FFFFFF',
                 borderRadius: '12px',
                 padding: '24px',
                 border: '1px solid rgba(139, 92, 246, 0.4)',
@@ -858,7 +858,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                   </div>
                   <button
                     onClick={addBulkRow}
-                    style={{ padding: '8px 14px', borderRadius: '6px', backgroundColor: '#8B5CF6', color: '#FFFFFF', fontWeight: '700', border: 'none', cursor: 'pointer', fontSize: '0.82rem' }}
+                    style={{ padding: '8px 14px', borderRadius: '6px', backgroundColor: '#8B5CF6', color: '#334155', fontWeight: '700', border: 'none', cursor: 'pointer', fontSize: '0.82rem' }}
                   >
                     + Add Event Row
                   </button>
@@ -866,32 +866,32 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
                   {bulkRows.map((row, idx) => (
-                    <div key={row.id} style={{ display: 'grid', gridTemplateColumns: '30px 1.5fr 1fr 1fr 1fr 1.5fr 40px', gap: '8px', alignItems: 'center', backgroundColor: '#1E293B', padding: '8px 12px', borderRadius: '8px' }}>
+                    <div key={row.id} style={{ display: 'grid', gridTemplateColumns: '30px 1.5fr 1fr 1fr 1fr 1.5fr 40px', gap: '8px', alignItems: 'center', backgroundColor: '#F8FAFC', padding: '8px 12px', borderRadius: '8px' }}>
                       <span style={{ fontSize: '0.78rem', color: '#64748B', fontWeight: 'bold' }}>{idx + 1}.</span>
                       <input
                         type="text"
                         placeholder="Event Title (e.g. Tihar)"
                         value={row.title}
                         onChange={e => updateBulkRow(row.id, 'title', e.target.value)}
-                        style={{ padding: '8px', borderRadius: '4px', backgroundColor: '#0F172A', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', fontSize: '0.8rem' }}
+                        style={{ padding: '8px', borderRadius: '4px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', color: '#FFF', fontSize: '0.8rem' }}
                       />
                       <input
                         type="date"
                         value={row.dateAD}
                         onChange={e => updateBulkRow(row.id, 'dateAD', e.target.value)}
-                        style={{ padding: '8px', borderRadius: '4px', backgroundColor: '#0F172A', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', fontSize: '0.8rem' }}
+                        style={{ padding: '8px', borderRadius: '4px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', color: '#FFF', fontSize: '0.8rem' }}
                       />
                       <input
                         type="text"
                         placeholder="Date BS (e.g. 2083 Kartik 20)"
                         value={row.dateBS}
                         onChange={e => updateBulkRow(row.id, 'dateBS', e.target.value)}
-                        style={{ padding: '8px', borderRadius: '4px', backgroundColor: '#0F172A', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', fontSize: '0.8rem' }}
+                        style={{ padding: '8px', borderRadius: '4px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', color: '#FFF', fontSize: '0.8rem' }}
                       />
                       <select
                         value={row.type}
                         onChange={e => updateBulkRow(row.id, 'type', e.target.value)}
-                        style={{ padding: '8px', borderRadius: '4px', backgroundColor: '#0F172A', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', fontSize: '0.8rem' }}
+                        style={{ padding: '8px', borderRadius: '4px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', color: '#FFF', fontSize: '0.8rem' }}
                       >
                         <option value="HOLIDAY">Holiday</option>
                         <option value="EXAM">Exam Routine</option>
@@ -903,12 +903,12 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                         placeholder="Description"
                         value={row.description}
                         onChange={e => updateBulkRow(row.id, 'description', e.target.value)}
-                        style={{ padding: '8px', borderRadius: '4px', backgroundColor: '#0F172A', border: '1px solid rgba(255,255,255,0.1)', color: '#FFF', fontSize: '0.8rem' }}
+                        style={{ padding: '8px', borderRadius: '4px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', color: '#FFF', fontSize: '0.8rem' }}
                       />
                       <button
                         onClick={() => removeBulkRow(row.id)}
                         disabled={bulkRows.length <= 1}
-                        style={{ backgroundColor: 'transparent', color: '#F87171', border: 'none', cursor: 'pointer', opacity: bulkRows.length <= 1 ? 0.3 : 1 }}
+                        style={{ backgroundColor: 'transparent', color: '#EF4444', border: 'none', cursor: 'pointer', opacity: bulkRows.length <= 1 ? 0.3 : 1 }}
                       >
                         <X size={16} />
                       </button>
@@ -924,7 +924,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                     padding: '14px',
                     borderRadius: '8px',
                     backgroundColor: '#8B5CF6',
-                    color: '#FFFFFF',
+                    color: '#334155',
                     fontWeight: '900',
                     fontSize: '0.95rem',
                     border: 'none',
@@ -945,7 +945,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                 padding: '24px',
                 border: '1px solid rgba(239, 68, 68, 0.3)',
               }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#F87171', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: '800', color: '#EF4444', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <ShieldAlert size={20} />
                   <span>Declare Emergency Holiday</span>
                 </h3>
@@ -962,7 +962,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                       value={emergTitle}
                       onChange={e => setEmergTitle(e.target.value)}
                       required
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#FFFFFF', outline: 'none' }}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#334155', outline: 'none' }}
                     />
                   </div>
 
@@ -974,7 +974,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                         value={emergDateAD}
                         onChange={e => setEmergDateAD(e.target.value)}
                         required
-                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#FFFFFF', outline: 'none' }}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#334155', outline: 'none' }}
                       />
                     </div>
                     <div>
@@ -985,7 +985,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                         value={emergDateBS}
                         onChange={e => setEmergDateBS(e.target.value)}
                         required
-                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#FFFFFF', outline: 'none' }}
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#334155', outline: 'none' }}
                       />
                     </div>
                   </div>
@@ -998,7 +998,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                       value={emergReason}
                       onChange={e => setEmergReason(e.target.value)}
                       required
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#FFFFFF', outline: 'none' }}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid rgba(239, 68, 68, 0.4)', color: '#334155', outline: 'none' }}
                     />
                   </div>
 
@@ -1010,7 +1010,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                       padding: '12px',
                       borderRadius: '6px',
                       backgroundColor: '#DC2626',
-                      color: '#FFFFFF',
+                      color: '#334155',
                       fontWeight: '800',
                       border: 'none',
                       cursor: 'pointer',
@@ -1045,12 +1045,12 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
           padding: '16px',
         }}>
           <div style={{
-            backgroundColor: '#0F172A',
+            backgroundColor: '#FFFFFF',
             border: '1px solid rgba(255, 255, 255, 0.15)',
             borderRadius: '12px',
             padding: '24px',
             width: 'min(500px, 94vw)',
-            color: '#F8FAFC',
+            color: '#0F172A',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1070,7 +1070,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                   value={editTitle}
                   onChange={e => setEditTitle(e.target.value)}
                   required
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', outline: 'none' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', color: '#334155', outline: 'none' }}
                 />
               </div>
 
@@ -1082,7 +1082,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                     value={editDateAD}
                     onChange={e => setEditDateAD(e.target.value)}
                     required
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', outline: 'none' }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', color: '#334155', outline: 'none' }}
                   />
                 </div>
                 <div>
@@ -1092,7 +1092,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                     value={editDateBS}
                     onChange={e => setEditDateBS(e.target.value)}
                     required
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', outline: 'none' }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', color: '#334155', outline: 'none' }}
                   />
                 </div>
               </div>
@@ -1103,7 +1103,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                   <select
                     value={editType}
                     onChange={e => setEditType(e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', outline: 'none' }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', color: '#334155', outline: 'none' }}
                   >
                     <option value="HOLIDAY">Public Holiday</option>
                     <option value="EXAM">Examination Routine</option>
@@ -1117,7 +1117,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                     type="text"
                     value={editDescription}
                     onChange={e => setEditDescription(e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#1E293B', border: '1px solid rgba(255,255,255,0.1)', color: '#FFFFFF', outline: 'none' }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', color: '#334155', outline: 'none' }}
                   />
                 </div>
               </div>
@@ -1126,7 +1126,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                 <button
                   type="button"
                   onClick={() => setEditingEvent(null)}
-                  style={{ flex: 1, padding: '10px', borderRadius: '6px', backgroundColor: '#1E293B', color: '#94A3B8', border: 'none', fontWeight: '700', cursor: 'pointer' }}
+                  style={{ flex: 1, padding: '10px', borderRadius: '6px', backgroundColor: '#F8FAFC', color: '#94A3B8', border: 'none', fontWeight: '700', cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
@@ -1145,13 +1145,13 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
 
       {/* ADMIN CONTROLS: Academic Calendar & Holiday Configuration */}
       <div style={{
-        backgroundColor: '#0F172A',
+        backgroundColor: '#FFFFFF',
         borderRadius: '12px',
         padding: '24px',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        border: '1px solid #E2E8F0',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#F8FAFC', margin: 0 }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#0F172A', margin: 0 }}>
             Academic Calendar Events Roster Table
           </h3>
           <span style={{ fontSize: '0.8rem', color: '#94A3B8' }}>Total Events: {events.length}</span>
@@ -1165,7 +1165,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', color: '#CBD5E1' }}>
               <thead>
-                <tr style={{ backgroundColor: '#1E293B', color: '#94A3B8', textAlign: 'left' }}>
+                <tr style={{ backgroundColor: '#F8FAFC', color: '#94A3B8', textAlign: 'left' }}>
                   <th style={{ padding: '10px 14px' }}>Event Title</th>
                   <th style={{ padding: '10px 14px' }}>Date (BS)</th>
                   <th style={{ padding: '10px 14px' }}>Date (AD)</th>
@@ -1177,7 +1177,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
               <tbody>
                 {events.map((ev) => (
                   <tr key={ev.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                    <td style={{ padding: '12px 14px', fontWeight: '700', color: '#F8FAFC' }}>
+                    <td style={{ padding: '12px 14px', fontWeight: '700', color: '#0F172A' }}>
                       {ev.title}
                       {ev.description && <div style={{ fontSize: '0.75rem', color: '#94A3B8', fontWeight: 'normal' }}>{ev.description}</div>}
                     </td>
@@ -1185,7 +1185,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                     <td style={{ padding: '12px 14px' }}>{ev.dateAD}</td>
                     <td style={{ padding: '12px 14px' }}>
                       {ev.isEmergency ? (
-                        <span style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#F87171', padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(239, 68, 68, 0.4)', fontWeight: '700', fontSize: '0.75rem' }}>
+                        <span style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#EF4444', padding: '3px 8px', borderRadius: '4px', border: '1px solid rgba(239, 68, 68, 0.4)', fontWeight: '700', fontSize: '0.75rem' }}>
                           EMERGENCY HOLIDAY
                         </span>
                       ) : ev.type === 'EXAM' ? (
@@ -1215,7 +1215,7 @@ export default function AcademicCalendarManager({ userRole = 'Principal' }: { us
                           </button>
                           <button
                             onClick={() => handleDeleteEvent(ev.id)}
-                            style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#F87171', border: 'none', borderRadius: '4px', padding: '6px 10px', cursor: 'pointer' }}
+                            style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: 'none', borderRadius: '4px', padding: '6px 10px', cursor: 'pointer' }}
                             title="Delete Event"
                           >
                             <Trash2 size={14} />
